@@ -1,0 +1,2692 @@
+#library "mdibuild"
+#include "ZCommon.acs"
+
+#import "redrum.acs"
+#import "classic.acs"
+#import "mdistuff.acs"
+#import "mdinwdi.acs"
+
+/////////////////////////////////////////
+////////////////////////////////////////
+/////////////////////////////////////////
+///////////// Self-generation by Zeberpal
+/////////////////////////////////////////
+////////////////////////////////////////
+
+
+int loadbit = 0;
+bool BuildingDone = false;
+int ENTRYnum = 0;
+int mapstyle;
+bool mdilights = true;
+
+str flatTX[24] =
+{
+"F_SKY1", //[0] Nothing 
+"", //[1] Base Floor #1
+"", //[2] Base Floor #2
+"", //[3] Base Floor #3
+"", //[4] Base Floor #4
+"", //[5] Base Floor #5
+"", //[6] Detail Floor #1
+"", //[7] Detail Floor #2
+"", //[8] Detail Floor #3
+"", //[9] Detail Floor #4
+"", //[10] Detail Floor #5
+"", //[11] Light flat #1
+"", //[12] Light flat #2
+"", //[13] Light flat #3
+"", //[14] Light flat #4 circle/rhombus
+"", //[15] Light flat #4 circle/rhombus
+"", //[16] Trap Floor #1
+"", //[17] Trap Floor #2
+"", //[18] Trap Ceil #1
+"", //[19] Trap Ceil #2
+"", //[20]
+""};
+str wallTX[24] = {"-","","","","","",/*6 window*/"",/*7 global border wall*/"",/*8 sky*/"","","","","","","","","","","","","","","","",};
+str interpass = "";
+str bugwall = "";
+
+
+str AmbienceSFX[9] = {"",   "","","","","","","",""};
+//int ceilLEVEL1;
+//int ceilLEVEL2;
+
+int TRAP[3] = {0,0,0};
+int VisualAt[3] = {0,0,0};
+int BaseCeilingHeight = 128;
+int BaseFloorHeight = 0;
+int RGB[7] = {0, 0,0,0,0,0,0};
+int QuestLine[64][5];
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   RADAR
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+
+
+
+
+
+/*WWWWWNWWWWWWWWWWWWWWWNWWNNNNNNNWWWWWWWWWWWWWWNWWWWWWW
+WWWWWW:-NWWWWWy:dWWWWN:/WN/`-oo++/++odWNWWWWWh::WWWWWWW
+WWWWWWo oWWWWN` /WWWWy`dWW+ sWWWWNWdy+::/yNWWy /WWWWWWW
+WWWWWWW:`dWWWs.: hWWN.sWWWy sWWWWWWWWWWd: /WWW /WWWWWWW
+WWWWWWWN/.WWN:dW`-WWo:WWWWW +WWWWWWWWWWWs .WWN oWWWWWWW
+WWWWWWWWN--W+yWWy hd.WWWWWW +WWWWWWWWWWd.-dWWN`oWWWWWWW
+WWWWWWWWWd`::WWWW-..sWWWWWW oWWWWWWWWW+/hNWWWN`oWWWWWWW
+WWWWWWWWWW+ hWWWWy .NWWWWWh /WWNWdyyshWNWWWWWd +WWWWWWW
+WWWWWWWWWWNsWWWWWWodWWWWWdo+syyyhdWNWWWWWWWWWhsWWWWWWWW
+WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW  SELF-GENERATOR */
+
+
+
+int ContainerType[40] = {
+//   direction 1:  x border
+
+0, //0 // null
+1, //1 // 1 block
+2, //2 // 2 blocks
+3, //3 // 3 long blocks
+4, //4 // 4 long blocks
+5, //5 // 5 long blocks
+6, //6 // 6 long blocks
+2, //7 // 4 quadblocks
+3, //8 // 6 rectangle blocks
+3, //9 // 9 quad blocks
+
+//  direction 1:  y border
+
+0, //10 // null
+1, //11 // 1 block
+1, //12 // 2 blocks
+1, //13 // 3 long blocks
+1, //14 // 4 long blocks
+1, //15 // 5 long blocks
+1, //16 // 6 long blocks
+2, //17 // 4 quadblocks
+2, //18 // 6 rectangle blocks
+3, //19 // 9 quad blocks
+
+//  direction 2:  X border
+
+0, //20 // null
+1, //21 // 1 block
+1, //22 // 2 blocks
+1, //23 // 3 long blocks
+1, //24 // 4 long blocks
+1, //25 // 5 long blocks
+1, //26 // 6 long blocks
+2, //27 // 4 quadblocks
+2, //28 // 6 rectangle blocks
+3, //29 // 9 quad blocks
+
+//  direction 2:  y border
+
+0, //30 // null
+1, //31 // 1 block
+2, //32 // 2 blocks
+3, //33 // 3 long blocks
+4, //34 // 4 long blocks
+5, //35 // 5 long blocks
+6, //36 // 6 long blocks
+2, //37 // 4 quadblocks
+3, //38 // 6 rectangle blocks
+3, //39 // 9 quad blocks
+};
+
+
+
+//140
+int dirLINE[561] =
+{
+0,
+//1
+  1,2,3,4,5,6, //1
+//1,2,3,4,5,6
+  11,12,13,14,15,16,//2
+// 7, 8, 9,10,11,12
+  21,22,23,24,25,26,//3
+//13,14,15,16,17,18
+  31,32,33,34,35,36,//4
+//19,20,21,22,23,24
+  42,43,44,45,46,//5
+//25,26,27,28,29
+  51,52,53,54,55,56,//6
+//30,31,32,33,34,35
+  61,62,63,64,65,66,//7
+//36,37,38,39,40,41
+  71,72,73,74,75,76,//8
+//42,43,44,45,46,47
+  81,82,83,84,85,86,//9
+//48,49,50,51,52,53
+  92,93,94,95,96,//10
+//54,55,56,57,58
+  101,102,103,104,105,106,//11
+// 59, 60, 61, 62, 63, 64
+  111,112,113,114,115,116,//12
+// 65, 66, 67, 68, 69, 70
+  121,122,123,124,125,126,//13
+// 71, 72, 73, 74, 75, 76
+  131,132,133,134,135,136,//14
+// 77, 78, 79, 80, 81, 82
+  142,143,144,145,146,//15
+// 83, 84, 85, 86, 87
+  151,152,153,154,155,156,//16
+// 88, 89, 90, 91, 92, 93
+  161,162,163,164,165,166,//17
+// 94, 95, 96, 97, 98, 99
+  171,172,173,174,175,176,//18
+//100,101,102,103,104,105
+  181,182,183,184,185,186,//19
+//106,107,108,109,110,111
+  192,193,194,195,196,//20
+//112,113,114,115,116
+  201,203,204,205,206,//21
+//117,118,119,120,121
+  211,213,214,215,216,//22
+//122,123,124,125,126
+  221,223,224,225,226,//23
+//127,128,129,130,131
+  231,233,234,235,236,//24
+//132,133,134,135,136
+  243,244,245,246,//25
+//137,138,139,140
+ // 2
+42,31,45,46,44,43,//1
+92,81,95,96,94,93,//2
+142,131,145,146,144,143,//3
+192,181,195,196,194,193,//4
+231,245,246,244,243,//5
+32,21,35,36,34,33,//6
+82,71,85,86,84,83,//7
+132,121,135,136,134,133,//8
+182,171,185,186,184,183,//9
+221,236,235,234,233,//10
+22,11,25,26,24,23,//11
+72,61,75,76,74,73,//12
+122,111,125,126,124,123,//13
+172,161,175,176,174,173,//14
+211,225,226,224,223,//15
+12,1,15,16,14,13,//16
+62,51,65,66,64,63,//17
+112,101,115,116,114,113,//18
+162,151,165,166,164,163,//19
+201,215,216,214,213,//20
+2,5,6,4,3,//21
+52,55,56,54,53,//22
+102,105,106,104,103,//23
+152,155,156,154,153,//24
+205,206,204,203,//25
+ // 3
+231,192,244,243,246,245,//1
+221,182,234,233,236,235,//2
+211,172,224,223,226,225,//3
+201,162,214,213,216,215,//4
+152,204,203,206,205,//5
+181,142,194,193,196,195,//6
+171,132,184,183,186,185,//7
+161,122,174,173,176,175,//8
+151,112,164,163,166,165,//9
+102,154,153,156,155,//10
+131,92,144,143,146,145,//11
+121,82,134,133,136,135,//12
+111,72,124,123,126,125,//13
+101,62,114,113,116,115,//14
+52,104,103,106,105,//15
+81,42,94,93,96,95,//16
+71,32,84,83,86,85,//17
+61,22,74,73,76,75,//18
+51,12,64,63,66,65,//19
+2,54,53,56,55,//20
+31,44,43,46,45,//21
+21,34,33,36,35,//22
+11,24,23,26,25,//23
+1,14,13,16,15,//24
+4,3,6,5,//25
+//4
+152,201,206,205,203,204,// 1
+102,151,156,155,153,154,//2
+52,101,106,105,103,104,//3
+2,51,56,55,53,54,//4
+1,6,5,3,4,//5
+162,211,216,215,213,214,//6
+112,161,166,165,163,164,//7
+62,111,116,115,113,114,//8
+12,61,66,65,63,64,//9
+11,16,15,13,14,//10
+172,221,226,225,223,224,//11
+122,171,176,175,173,174,//12
+72,121,126,125,123,124,//13
+22,71,76,75,73,74,//14
+21,26,25,23,24,//15
+182,231,236,235,233,234,//16
+132,181,186,185,183,184,//17
+82,131,136,135,133,134,//18
+32,81,86,85,83,84,//19
+31,36,35,33,34,//20
+192,246,245,243,244,//21
+142,196,195,193,194,//22
+92,146,145,143,144,//23
+42,96,95,93,94,//24
+46,45,43,44//25
+};
+
+
+
+int dirSSOURCE[101] =
+{0,
+ /* 1 dir */ 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97,
+ /* 2 dir */ 17, 37, 57, 77, 97, 13, 33, 53, 73, 93, 9, 29, 49, 69, 89, 5, 25, 45, 65, 85, 1, 21, 41, 61, 81,
+ /* 3 dir */ 91, 93, 89, 85, 81, 77, 73, 69, 65, 61, 57, 53, 49, 45, 41, 37, 33, 29, 25, 21, 17, 13, 9, 5, 1,
+ /* 4 dir */ 81, 61, 41, 21, 1, 85, 65, 45, 25, 5, 89, 69, 49, 29, 9, 93, 73, 53, 33, 13, 97, 77, 57, 37, 17
+};
+
+int dirTHING[101] =
+{0,
+ /* 1 dir */ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,
+ /* 2 dir */ 5,10,15,20,25,4,9,14,19,24,3,8,13,18,23,2,7,12,17,22,1,6,11,16,21,
+ /* 3 dir */ 25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,
+ /* 4 dir */ 21,16,11,6,1,22,17,12,7,2,23,18,13,8,3,24,19,14,9,4,25,20,15,10,5
+};
+
+
+int dirSECTOR[401] =
+{0,
+ /* 1 dir */ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+ /* 2 */    21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,
+ /* 3 */    41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,
+ /* 4 */    61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,
+ /* 5 */    81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,
+ /* 2 dir */20,17,18,19,40,37,38,39,60,57,58,59,80,77,78,79,100,97,98,99,
+ /* 2 */    16,13,14,15,36,33,34,35,56,53,54,55,76,73,74,75,96,93,94,95,
+ /* 3 */    12,9,10,11,32,29,30,31,52,49,50,51,72,69,70,71,92,89,90,91,
+ /* 4 */    8,5,6,7,28,25,26,27,48,45,46,47,68,65,66,67,88,85,86,87,
+ /* 5 */    4,1,2,3,24,21,22,23,44,41,42,43,64,61,62,63,84,81,82,83,
+ /* 3 dir*/ 99,100,97,98,95,96,93,94,91,92,89,90,87,88,85,86,83,84,81,82,
+ /* 2 */    79,80,77,78,75,76,73,74,71,72,69,70,67,68,65,66,63,64,61,62,
+ /* 3 */    59,60,57,58,55,56,53,54,51,52,49,50,47,48,45,46,43,44,41,42,
+ /* 4 */    39,40,37,38,35,36,33,34,31,32,29,30,27,28,25,26,23,24,21,22,
+ /* 5 */    19,20,17,18,15,16,13,14,11,12,9,10,7,8,5,6,3,4,1,2,
+ /* 4 dir*/ 82,83,84,81,62,63,64,61,42,43,44,41,22,23,24,21,2,3,4,1,
+ /* 2 */    86,87,88,85,66,67,68,65,46,47,48,45,26,27,28,25,6,7,8,5,
+ /* 3 */    90,91,92,89,70,71,72,69,50,51,52,49,30,31,32,29,10,11,12,9,
+ /* 4 */    94,95,96,93,74,75,76,73,54,55,56,53,34,35,36,33,14,15,16,13,
+ /* 5 */    98,99,100,97,78,79,80,77,58,59,60,57,38,39,40,37,18,19,20,17,
+};
+
+
+int dirBlockWALL[41] =
+{0,
+ /* 0 side */ 0,0,0,0,0,0,0,0,0,0,
+ /* 1 side */ 1,2,3,4,5,0,0,0,0,0,
+ /* 2 side */ 1,2,3,4,5,6,7,8,9,10,
+ /* 3 side */ 0,0,0,0,0,6,7,8,9,10
+};
+
+
+int IsEntrance[256];
+int EntCounter = 0;
+
+int CloseWall[10] = {0,0,0,0,0,0,0,0,0,0};
+
+bool block[16][16] = {
+{true, true, true, true, true, true, true, true },
+{true, true, true, true, true, true, true, true },
+{true, true, true, true, true, true, true, true },
+{true, true, true, true, true, true, true, true },
+{true, true, true, true, true, true, true, true },
+{true, true, true, true, true, true, true, true },
+{true, true, true, true, true, true, true, true },
+{true, true, true, true, true, true, true, true }
+};
+
+
+
+
+
+
+int order[10] = {0,0,0,0,0,0,0,0,0,0};
+int ContainerEntry[3] = {0,0,0};
+
+int xcounter = 0;
+int ycounter = 0;
+int Direction = 0;
+int Try = 16;
+int blockcounter = 1;
+int blockertype[10];
+int blocknum;
+
+/*
+		  |    	             |    	             |    	             |    	             |    	             |
+          |    	             |    	             |    	             |    	             |    	             |
+               	             |    	                  	             |    	             |
+          |    	             |    	             |    	             |    	             |    	             |
+	      |    	             |    	             |    	             |    	             |    	             |
+----  ----         ----------          ----------          ----  ----                                                  ----------             ----  ----
+
+    1                   2                  3                     4               5                   6                      7                     8                    9
+*/
+
+
+
+
+
+script "check" (int xx, int yy)
+{print(i:block[yy][xx]);}
+
+
+Script "Builder" (void)
+{
+ACS_NamedExecute("DefineContainer", 0);// if current block is free
+}
+
+
+
+Script "ClearPreparations" (void)
+{
+Direction = 0;
+Try = 16;
+if (xcounter >= 7) {if (ycounter < 7) {ycounter++; Xcounter = 0; blockcounter++; loadbit++;} else {ACS_NamedExecute("OutsideWalls", 0); BuildingDone = true; terminate;}} // At this point whole generating is done
+else               { xcounter++; blockcounter++;loadbit++;}
+{
+if (block[ycounter][xcounter] == true) {ACS_NamedExecute("DefineContainer", 0);}// if current block is free
+else {restart;}
+}
+}
+
+
+
+Script "DefineContainer" (void)
+{
+str BuildContainer = "";
+int Hanger = 0;
+Direction = random(0,3);  // set direction for a container
+switch(Direction)
+  {
+   case 0: Hanger = 0; break;
+   case 1: Hanger = 20; break;
+   case 2: Hanger = 0; break;
+   case 3: Hanger = 20; break;
+  }
+int SetContainerType = random(1,10);//10// random(1,9);  // set container type
+{
+     if (SetContainerType < 5) SetContainerType = 1;
+else if ((SetContainerType > 4) && (SetContainerType < 8)) SetContainerType = 2;
+else if ((SetContainerType > 7) && (SetContainerType < 10)) SetContainerType = 3;
+else if (SetContainerType > 9) SetContainerType = 7;
+}
+if (Try <= 0) {SetContainerType = 1;} //If too many attempts to set Container has failed, then picking 1x1 for sure
+
+
+int Xcheck = Hanger + SetContainerType;   //pointing to the array number of direction limit
+int Ycheck = (Hanger + 10) + SetContainerType;
+
+int ContainerLimitX = ContainerType[Xcheck];  // find out what is the current limit
+int ContainerLimitY = ContainerType[Ycheck];  // find out what is the current limit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+while(ContainerLimitY > 0)
+{
+for(int k = 0; k < ContainerLimitX; k++)
+{ if (block[ycounter + ContainerLimitY-1][xcounter + k] == false) {Try--; Restart;}}
+ContainerLimitY--;
+}
+
+
+
+
+
+
+
+
+
+//SUCCESS
+//block[ycounter][xcounter] = false;
+
+//getting back the initial data to set the container block
+Xcheck = ContainerType[Hanger + SetContainerType];  //pointing to the array number of direction limit
+Ycheck = ContainerType[Hanger + SetContainerType + 10];
+
+ContainerLimitX = ContainerType[Xcheck];
+ContainerLimitY = ContainerType[Ycheck];
+
+
+
+while(ContainerLimitY > 0)
+{
+for(int m = 0; m < ContainerLimitX; m++)
+{block[ycounter + ContainerLimitY-1][xcounter + m] = false;}
+ContainerLimitY--;
+//delay(1);
+}
+
+
+
+
+//Preparing to draw stuff
+
+
+
+switch(SetContainerType)
+  {
+case 1:
+     order[1] = blockcounter;
+	 blockertype[1] = 1;
+	 blocknum = 1;
+break;
+case 2:
+     if (Direction == 0)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 1;
+     blockertype[1] = 7;
+	 blockertype[2] = 1;
+	 }
+     if (Direction == 1)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 8;
+     blockertype[1] = 6;
+	 blockertype[2] = 4;
+	 }
+     if (Direction == 2)
+     {
+	 order[1] = blockcounter + 1;
+	 order[2] = blockcounter;
+     blockertype[1] = 1;
+	 blockertype[2] = 7;
+	 }
+     if (Direction == 3)
+     {
+	 order[1] = blockcounter + 8;
+	 order[2] = blockcounter;
+     blockertype[1] = 4;
+	 blockertype[2] = 6;
+	 }
+	 blocknum = 2;
+break;
+case 3:
+     if (Direction == 0)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 1;
+	 order[3] = blockcounter + 2;
+     blockertype[1] = 7;
+	 blockertype[2] = 8;
+	 blockertype[3] = 3;
+	 }
+     if (Direction == 1)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 8;
+	 order[3] = blockcounter + 16;
+     blockertype[1] = 5;
+	 blockertype[2] = 6;
+	 blockertype[3] = 4;
+	 }
+     if (Direction == 2)
+     {
+	 order[1] = blockcounter + 2;
+	 order[2] = blockcounter + 1;
+	 order[3] = blockcounter;
+     blockertype[1] = 3;
+	 blockertype[2] = 8;
+	 blockertype[3] = 7;
+	 }
+     if (Direction == 3)
+     {
+	 order[1] = blockcounter + 16;
+	 order[2] = blockcounter + 8;
+	 order[3] = blockcounter;
+     blockertype[1] = 4;
+	 blockertype[2] = 6;
+	 blockertype[3] = 5;
+	 }
+	 blocknum = 3;
+break;
+case 4:
+     if (Direction == 0)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 1;
+	 order[3] = blockcounter + 2;
+	 order[4] = blockcounter + 3;
+	 CloseWall[1] = 3; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 2;
+	 ContainerEntry[1] = blockcounter+3; ContainerEntry[2] = blockcounter+3;
+	 }
+     if (Direction == 1)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 8;
+	 order[3] = blockcounter + 16;
+	 order[4] = blockcounter + 24;
+	 CloseWall[1] = 1; CloseWall[2] = 1; CloseWall[3] = 1; CloseWall[4] = 2;
+	 ContainerEntry[1] = blockcounter; ContainerEntry[2] = blockcounter+24;
+	 }
+     if (Direction == 2)
+     {
+	 order[1] = blockcounter + 3;
+	 order[2] = blockcounter + 2;
+	 order[3] = blockcounter + 1;
+	 order[4] = blockcounter;
+	 CloseWall[1] = 2; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 3;
+	 ContainerEntry[1] = blockcounter+3; ContainerEntry[2] = blockcounter+3;
+	 }
+     if (Direction == 3)
+     {
+	 order[1] = blockcounter + 24;
+	 order[2] = blockcounter + 16;
+	 order[3] = blockcounter + 8;
+	 order[4] = blockcounter;
+	 CloseWall[1] = 2; CloseWall[2] = 1; CloseWall[3] = 1; CloseWall[4] = 1;
+	 ContainerEntry[1] = blockcounter; ContainerEntry[2] = blockcounter+24;
+	 }
+break;
+case 5:
+     if (Direction == 0)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 1;
+	 order[3] = blockcounter + 2;
+	 order[4] = blockcounter + 3;
+	 order[5] = blockcounter + 4;
+	 CloseWall[1] = 3; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 3; CloseWall[5] = 2;
+	 ContainerEntry[1] = blockcounter+4; ContainerEntry[2] = blockcounter+2;
+	 }
+     if (Direction == 1)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 8;
+	 order[3] = blockcounter + 16;
+	 order[4] = blockcounter + 24;
+	 order[5] = blockcounter + 32;
+	 CloseWall[1] = 1; CloseWall[2] = 1; CloseWall[3] = 1; CloseWall[4] = 1; CloseWall[5] = 2;
+	 ContainerEntry[1] = blockcounter+16; ContainerEntry[2] = blockcounter+32;
+	 }
+     if (Direction == 2)
+     {
+	 order[1] = blockcounter + 4;
+	 order[2] = blockcounter + 3;
+	 order[3] = blockcounter + 2;
+	 order[4] = blockcounter + 1;
+	 order[5] = blockcounter;
+	 CloseWall[1] = 2; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 3; CloseWall[5] = 3;
+	 ContainerEntry[1] = blockcounter+4; ContainerEntry[2] = blockcounter+2;
+	 }
+     if (Direction == 3)
+     {
+	 order[1] = blockcounter + 32;
+	 order[2] = blockcounter + 24;
+	 order[3] = blockcounter + 16;
+	 order[4] = blockcounter + 8;
+	 order[5] = blockcounter;
+	 CloseWall[1] = 2; CloseWall[2] = 1; CloseWall[3] = 1; CloseWall[4] = 1; CloseWall[5] = 1;
+	 ContainerEntry[1] = blockcounter+16; ContainerEntry[2] = blockcounter+32;
+	 }
+break;
+case 6:
+     if (Direction == 0)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 1;
+	 order[3] = blockcounter + 2;
+	 order[4] = blockcounter + 3;
+	 order[5] = blockcounter + 4;
+	 order[6] = blockcounter + 5;
+	 CloseWall[1] = 3; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 3; CloseWall[5] = 3; CloseWall[6] = 2;
+	 ContainerEntry[1] = blockcounter+5; ContainerEntry[2] = blockcounter+5;
+	 }
+     if (Direction == 1)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 8;
+	 order[3] = blockcounter + 16;
+	 order[4] = blockcounter + 24;
+	 order[5] = blockcounter + 32;
+	 order[6] = blockcounter + 40;
+	 CloseWall[1] = 1; CloseWall[2] = 1; CloseWall[3] = 1; CloseWall[4] = 1; CloseWall[5] = 1; CloseWall[6] = 2;
+	 ContainerEntry[1] = blockcounter; ContainerEntry[2] = blockcounter+40;
+	 }
+     if (Direction == 2)
+     {
+	 order[1] = blockcounter + 5;
+	 order[2] = blockcounter + 4;
+	 order[3] = blockcounter + 3;
+	 order[4] = blockcounter + 2;
+	 order[5] = blockcounter + 1;
+	 order[6] = blockcounter;
+	 CloseWall[1] = 2; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 3; CloseWall[5] = 3; CloseWall[6] = 3;
+	 ContainerEntry[1] = blockcounter+5; ContainerEntry[2] = blockcounter+5;
+	 }
+     if (Direction == 3)
+     {
+	 order[1] = blockcounter + 40;
+	 order[2] = blockcounter + 32;
+	 order[3] = blockcounter + 24;
+	 order[4] = blockcounter + 16;
+	 order[5] = blockcounter + 8;
+	 order[6] = blockcounter;
+	 CloseWall[1] = 2; CloseWall[2] = 1; CloseWall[3] = 1; CloseWall[4] = 1; CloseWall[5] = 1; CloseWall[6] = 1;
+	 ContainerEntry[1] = blockcounter; ContainerEntry[2] = blockcounter+40;
+	 }
+break;
+case 7:
+     if (Direction == 0)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 1;
+	 order[3] = blockcounter + 9;
+	 order[4] = blockcounter + 8;
+	 blockertype[1] = 9;
+	 blockertype[2] = 6;
+	 blockertype[3] = 4;
+	 blockertype[4] = 7;
+	 }
+     if (Direction == 1)
+     {
+	 order[1] = blockcounter + 1;
+	 order[2] = blockcounter + 9;
+	 order[3] = blockcounter + 8;
+	 order[4] = blockcounter;
+	 blockertype[1] = 6;
+	 blockertype[2] = 5;
+	 blockertype[3] = 7;
+	 blockertype[4] = 9;
+	 }
+     if (Direction == 2)
+     {
+	 order[1] = blockcounter + 9;
+	 order[2] = blockcounter + 8;
+	 order[3] = blockcounter;
+	 order[4] = blockcounter + 1;
+	 blockertype[1] = 4;
+	 blockertype[2] = 7;
+	 blockertype[3] = 9;
+	 blockertype[4] = 6;
+	 }
+     if (Direction == 3)
+     {
+	 order[1] = blockcounter + 8;
+	 order[2] = blockcounter;
+	 order[3] = blockcounter + 1;
+	 order[4] = blockcounter + 9;
+	 blockertype[1] = 7;
+	 blockertype[2] = 9;
+	 blockertype[3] = 6;
+	 blockertype[4] = 4;
+	 }
+	 blocknum = 4;
+break;
+case 8:
+     if (Direction == 0)
+    {
+	order[1] = blockcounter;
+    order[2] = blockcounter + 1;
+    order[3] = blockcounter + 2;
+    order[4] = blockcounter + 10;
+    order[5] = blockcounter + 9;
+    order[6] = blockcounter + 8;
+	CloseWall[1] = 0; CloseWall[2] = 0; CloseWall[3] = 1; CloseWall[4] = 2; CloseWall[5] = 3; CloseWall[6] = 3;
+	ContainerEntry[1] = blockcounter+2; ContainerEntry[2] = blockcounter+10;
+	}
+    else if (Direction == 1)
+    {
+	order[1] = blockcounter + 1;
+    order[2] = blockcounter + 9;
+    order[3] = blockcounter + 17;
+    order[4] = blockcounter + 16;
+    order[5] = blockcounter + 8;
+    order[6] = blockcounter;
+	CloseWall[1] = 1; CloseWall[2] = 1; CloseWall[3] = 2; CloseWall[4] = 3; CloseWall[5] = 0; CloseWall[6] = 0;
+	ContainerEntry[1] = blockcounter+9; ContainerEntry[2] = blockcounter+17;
+	}
+    else if (Direction == 2)
+    {
+	order[1] = blockcounter + 10;
+    order[2] = blockcounter + 9;
+    order[3] = blockcounter + 8;
+    order[4] = blockcounter;
+    order[5] = blockcounter + 1;
+    order[6] = blockcounter + 2;
+	CloseWall[1] = 2; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 0; CloseWall[5] = 0; CloseWall[6] = 1;
+	ContainerEntry[1] = blockcounter+2; ContainerEntry[2] = blockcounter+10;
+	}
+    else if (Direction == 3)
+    {
+	order[1] = blockcounter + 16;
+    order[2] = blockcounter + 8;
+    order[3] = blockcounter;
+    order[4] = blockcounter + 1;
+    order[5] = blockcounter + 9;
+    order[6] = blockcounter + 17;
+	CloseWall[1] = 3; CloseWall[2] = 0; CloseWall[3] = 0; CloseWall[4] = 1; CloseWall[5] = 1; CloseWall[6] = 2;
+	ContainerEntry[1] = blockcounter+9; ContainerEntry[2] = blockcounter+17;
+	}
+break;
+case 9:
+     if (Direction == 0)
+     {
+	 order[1] = blockcounter;
+	 order[2] = blockcounter + 1;
+	 order[3] = blockcounter + 2;
+	 order[4] = blockcounter + 10;
+	 order[5] = blockcounter + 18;
+	 order[6] = blockcounter + 17;
+	 order[7] = blockcounter + 16;
+	 order[8] = blockcounter + 8;
+	 order[9] = blockcounter + 9;
+	 CloseWall[1] = 0; CloseWall[2] = 0; CloseWall[3] = 1; CloseWall[4] = 1; CloseWall[5] = 2; CloseWall[6] = 3; CloseWall[7] = 3; CloseWall[8] = 0;
+	 }
+     if (Direction == 1)
+     {
+	 order[1] = blockcounter + 2;
+	 order[2] = blockcounter + 10;
+	 order[3] = blockcounter + 18;
+	 order[4] = blockcounter + 17;
+	 order[5] = blockcounter + 16;
+	 order[6] = blockcounter + 8;
+	 order[7] = blockcounter;
+	 order[8] = blockcounter + 1;
+	 order[9] = blockcounter + 9;
+	 CloseWall[1] = 1; CloseWall[2] = 1; CloseWall[3] = 2; CloseWall[4] = 3; CloseWall[5] = 3; CloseWall[6] = 0; CloseWall[7] = 0; CloseWall[8] = 0;
+	 }
+     if (Direction == 2)
+     {
+	 order[1] = blockcounter + 18;
+	 order[2] = blockcounter + 17;
+	 order[3] = blockcounter + 16;
+	 order[4] = blockcounter + 8;
+	 order[5] = blockcounter;
+	 order[6] = blockcounter + 1;
+	 order[7] = blockcounter + 2;
+	 order[8] = blockcounter + 10;
+	 order[9] = blockcounter + 9;
+	 CloseWall[1] = 2; CloseWall[2] = 3; CloseWall[3] = 3; CloseWall[4] = 0; CloseWall[5] = 0; CloseWall[6] = 0; CloseWall[7] = 1; CloseWall[8] = 1;
+	 }
+     if (Direction == 3)
+     {
+	 order[1] = blockcounter + 16;
+	 order[2] = blockcounter + 8;
+	 order[3] = blockcounter;
+	 order[4] = blockcounter + 1;
+	 order[5] = blockcounter + 2;
+	 order[6] = blockcounter + 10;
+	 order[7] = blockcounter + 18;
+	 order[8] = blockcounter + 17;
+	 order[9] = blockcounter + 9;
+	 CloseWall[1] = 3; CloseWall[2] = 0; CloseWall[3] = 0; CloseWall[4] = 0; CloseWall[5] = 1; CloseWall[6] = 1; CloseWall[7] = 2; CloseWall[8] = 3;
+	 }
+ContainerEntry[1] = blockcounter+10; ContainerEntry[2] = blockcounter+17;
+break;
+}
+//BuildContainer = StrParam(s:"Container", i:SetContainerType);
+ACS_NamedExecute("Container", 0, SetContainerType);
+
+}
+
+
+
+
+
+
+
+
+int movespeed = 9999;
+
+
+
+
+
+/*
+- - - - -
+- + - + -
+- - - - -
+- + - + -
+- - - - -
+*/
+
+/*
+
+
+ ______     ______     __   __     ______   ______     __     __   __     ______     ______     ______
+/\  ___\   /\  __ \   /\ "-.\ \   /\__  _\ /\  __ \   /\ \   /\ "-.\ \   /\  ___\   /\  == \   /\  ___\
+\ \ \____  \ \ \/\ \  \ \ \-.  \  \/_/\ \/ \ \  __ \  \ \ \  \ \ \-.  \  \ \  __\   \ \  __<   \ \___  \
+ \ \_____\  \ \_____\  \ \_\\"\_\    \ \_\  \ \_\ \_\  \ \_\  \ \_\\"\_\  \ \_____\  \ \_\ \_\  \/\_____\
+  \/_____/   \/_____/   \/_/ \/_/     \/_/   \/_/\/_/   \/_/   \/_/ \/_/   \/_____/   \/_/ /_/   \/_____/
+
+
+*/
+
+function void BASE____Column64(int ordernum, int origin, int tx, int tx2, int tx3, int tx4)
+{
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin + 1], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin + 1], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin + 1], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 6], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 6], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 6], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 28], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 28], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 28], BLOCK_EVERYTHING);
+}
+
+
+function void BASE____Rhombus64(int ordernum, int origin, int tx, int tx2, int tx3, int tx4)
+{
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin + 24], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin + 24], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin + 24], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin + 22], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin + 22], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin + 22], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 14], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 14], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 14], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 11], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 11], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 11], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 35], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 35], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 35], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 37], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 37], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 37], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 1], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 1], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 1], BLOCK_EVERYTHING);
+}
+
+function void BASE____Rhombus64B(int ordernum, int origin, int tx, int tx2, int tx3, int tx4)
+{
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin -1], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin -1], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin -1], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 13], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 13], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 13], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 12], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 12], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx2]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 12], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 61], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin + 61], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin + 61], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 60], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 60], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx3]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 60], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 52], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 52], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 52], BLOCK_EVERYTHING);
+
+							    SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 53], SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineTexture (order[ordernum]*1000 + dirLine[(Direction*140) + origin - 53], SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx4]);
+								SetLineBlocking(order[ordernum]*1000 + dirLine[(Direction*140) + origin - 53], BLOCK_EVERYTHING);
+}
+
+function void BASE____Column64Clear(int origin)
+{
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 2 , SIDE_FRONT, TEXTURE_MIDDLE, "-");
+								SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 2 , SIDE_BACK, TEXTURE_MIDDLE, "-");
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 2 , BLOCK_NOTHING);
+
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin + 51, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+								SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin + 51, SIDE_BACK, TEXTURE_MIDDLE, "-");
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin + 51, BLOCK_NOTHING);
+
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 52, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+								SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 52, SIDE_BACK, TEXTURE_MIDDLE, "-");
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 52, BLOCK_NOTHING);
+
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 41, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+								SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 41, SIDE_BACK, TEXTURE_MIDDLE, "-");
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)] + origin  + 41, BLOCK_NOTHING);
+}
+
+
+
+
+function void BASE____Ceiling64(int ordernum, int numoftris, int value, int origin, int tx)
+{
+for(int a = 0; a < numoftris; a ++)    {
+							    Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + origin], movespeed, value);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + origin], flatTX[tx]);
+								}
+}
+
+function void BASE____Floor64(int ordernum, int numoftris, int value, int origin, int tx)
+{
+for(int a = 0; a < numoftris; a ++)    {
+							    Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + origin], movespeed, value);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + origin], flatTX[tx]);
+								}
+}
+
+
+function void BASE____VerticalRow(int ordernum, int Fvalue, int Cvalue, int origin, int Ftx, int Ctx)
+{
+for(int a = 0; a < 4; a ++)    {
+							    Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], movespeed, Fvalue);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 20], movespeed, Fvalue);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 40], movespeed, Fvalue);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 60], movespeed, Fvalue);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 80], movespeed, Fvalue);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], movespeed, Cvalue);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 20], movespeed, Cvalue);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 40], movespeed, Cvalue);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 60], movespeed, Cvalue);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 80], movespeed, Cvalue);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], flatTX[Ftx]);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 20], flatTX[Ftx]);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 40], flatTX[Ftx]);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 60], flatTX[Ftx]);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 80], flatTX[Ftx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], flatTX[Ctx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 20], flatTX[Ctx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 40], flatTX[Ctx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 60], flatTX[Ctx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a + 80], flatTX[Ctx]);
+
+								}
+}
+
+function void BASE____HorizontalRow(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)
+{
+for(int a = 0; a < endloop; a ++)    {
+							    Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], movespeed, Fvalue);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], movespeed, Cvalue);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], flatTX[Ftx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + origin  + a     ], flatTX[Ctx]);
+								}
+}
+
+
+//////////TELEPORT
+
+int TelepointCounter;
+Int Telepoint[64];
+
+
+function void SetTelepoint (int ordernum, int pointA/*, int PointB*/)
+{
+if (TelepointCounter < 63)
+{
+Telepoint[TelepointCounter] =   order[ordernum]*100 + dirThing[(Direction*25) + pointA ]; TelepointCounter++;
+//Telepoint[TelepointCounter] =   order[ordernum]*100 + dirThing[(Direction*25) + pointB ]; TelepointCounter++;
+}
+}
+
+
+
+
+
+
+
+/*
+Script "MDI_WarpToMap" (void)
+{
+ if(Warp(Telepoint[PlayerNumber()*2 ], 0, 0, 0, GetActorAngle(Telepoint[PlayerNumber()*2]), WARPF_STOP ,"", false, 0) == false) Teleport(23);
+ }
+*/
+
+
+//////////QUEST
+
+function void SetQuestLine (int Line)
+{
+//SetLineSpecial(Line, ACS_NamedExecute, "QuestDone", 0, Line);
+//PrintBold(i:Line);
+}
+
+
+
+
+
+
+
+//////////TRAP
+
+
+function void BASE____SetTrap(int ordernum, int origin)
+{
+//int TargetLine = origin + (order[ordernum]*1000);
+//SetLineSpecial(TargetLine, ACS_NamedExecuteAlways, "LineExe", 0 , TargetLine, 5 );
+}
+
+Script "BASE____SetTrap" (int ordernum, int origin)
+{
+int TargetLine = origin + (order[ordernum]*1000);
+SetLineSpecial(TargetLine, ACS_NamedExecuteAlways("LineExe", 0, TargetLine, 5));
+}
+
+
+Script "MDItrap" (int tid)
+{
+SetActivatorToTarget(tid);
+print(i:tid);
+bool RNG = random(0,1);
+
+for(int a = 0; a < 4; a ++)          Floor_MoveToValue(tid + a , 64, -192);
+
+								     //delay(35);
+for(int b = 0; b < 4; b ++)          {ChangeFloor(tid + b , flatTX[16 + RNG]);
+								     sector_setdamage(tid + b , 100, 14);}
+}
+
+
+
+
+function void BASE____Light(int ordernum, int place, int size, int Rlow, int Rtop, int Glow, int Gtop, int Blow, int Btop)
+{
+Str Light = StrParam(s:"mdi", i:size*64, s:"Light_", i:random(Rlow, Rtop), s:"_", i:random(Glow, Gtop), s:"_", i:random(Blow, Btop));
+SpawnSpotForced(Light, order[ordernum]*100 + dirThing[(Direction*25) + place ], 0, 0);
+}
+
+
+// 1
+
+
+// 5 = Trap trigger
+Script "LineExe" (int id, int Action)   //1135  //5            114      dirsource[1135/100]
+{
+if (Action == 0) Terminate;
+
+bool boolRNG = random(0,1);
+int ThingID = id/10 + 1;  //gives 114
+int SectorID = (ThingID - (id/1000)*100); //gives 114 - 100
+
+//int SectorID = id/100 + 1; //gives 12 //- 100;//dirSSOURCE[id/1000]; //only need 0 Direction for this
+
+
+
+//print(s:"SECTORID IS ",i:SectorID);
+
+switch(Action)
+{
+Case 5:
+if (checkInventory("murdererkey"))   Teleport(TelePoint[id/1000 - 1]);
+SetLineSpecial(id, 0);
+//for(int c = 0; c < 4; c ++)          Floor_MoveToValue((id/1000)*100 + dirSSOURCE[SectorID] + c, 64, GetSectorFloorZ((id/1000)*100 + dirSSOURCE[SectorID], 0,0) - 4);
+                                     ThingSound(ThingID, "Door/Start1", 127); ThingSound(ThingID, "Door/Start1", 127);
+                                     delay(25);
+                                     ThingSound(ThingID, "Door/Start2", 127); ThingSound(ThingID, "Door/Start2", 127);
+                                     delay(25);
+for(int a = 0; a < 4; a ++)          Floor_MoveToValue((id/1000)*100 + dirSSOURCE[SectorID] + a, 64, -192);
+
+									 delay(20);
+
+for(int b = 0; b < 4; b ++)          {
+	                                 ChangeFloor((id/1000)*100 + dirSSOURCE[SectorID] + b, flatTX[16 + boolRNG]);
+								     sector_setdamage((id/1000)*100 + dirSSOURCE[SectorID] + b, 100, 14);
+									 }
+//Print(s:"SUCCESS");
+break;
+}
+
+
+}
+
+
+
+function void GoreSpawn(int ordernum, int place)
+{
+int RNG = random(0,1);
+if (RNG ==0) SpawnSpotForced("MD_BLUD", order[ordernum]*100 + dirThing[(Direction*25) + place ], 0, 0);  RNG = random(0,1);
+if (RNG ==0) SpawnSpotForced("BDGoreSpawner", order[ordernum]*100 + dirThing[(Direction*25) + place ], 0, 0);
+}
+
+
+
+/*
+   _________         ________  ___   ______________________  _   _______
+  / ____<  /        / ____/ / / / | / / ____/_  __/  _/ __ \/ | / / ___/
+ / /    / /        / /_  / / / /  |/ / /     / /  / // / / /  |/ /\__ \
+/ /___ / /        / __/ / /_/ / /|  / /___  / / _/ // /_/ / /|  /___/ /
+\____//_/        /_/    \____/_/ |_/\____/ /_/ /___/\____/_/ |_//____/
+
+ */
+
+////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+///
+function void C1____Edge_Stroke(int ordernum, int Fheight, int Cheight, int Ftx, int Ctx)
+{
+//if (Cheight == 0) Cheight = BaseCeilingHeight;
+for(int a = 1; a < 21; a ++)    {
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Fheight);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Fheight);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+							    ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+							    ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+								}
+for(int b = 1; b < 5; b ++)     {
+	                            ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + b         ], flatTX[Ftx]);
+	                            ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ftx]);
+                                ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ftx]);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ftx]);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ftx]);
+                                ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ftx]);
+								ChangeFloor(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ftx]);
+	                            ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + b         ], flatTX[Ctx]);
+	                            ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ctx]);
+                                ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ctx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ctx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ctx]);
+                                ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ctx]);
+								ChangeCeiling(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ctx]);
+	                            Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b         ], movespeed,  Cheight);
+	                            Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20    ], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20 +16], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60 +16], movespeed,  Cheight);
+	                            Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b         ], movespeed,  Fheight);
+	                            Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20    ], movespeed,  Fheight);
+                                Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40    ], movespeed,  Fheight);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60    ], movespeed,  Fheight);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 20 +16], movespeed,  Fheight);
+                                Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 40 +16], movespeed,  Fheight);
+								Floor_MoveToValue(order[ordernum]*100 + dirSECTOR[(Direction*100) + b + 60 +16], movespeed,  Fheight);
+								}
+}
+
+
+
+
+
+
+
+
+function void C2____Edge_Stroke(int Cheight, int Ftx, int Ctx)
+{
+for(int a = 1; a < 21; a ++)    {
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+								ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+							    ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+								ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+							    ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+							    ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+							    ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+
+								}
+for(int b = 1; b < 5; b ++)     {
+//	                            ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b         ], flatTX[Ftx]);
+	                            ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ftx]);
+                                ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ftx]);
+								ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ftx]);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ftx]);
+                                ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ftx]);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ftx]);
+//	                            ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b         ], flatTX[Ctx]);
+	                            ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ctx]);
+                                ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ctx]);
+								ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ctx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ctx]);
+                                ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ctx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ctx]);
+//	                            Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b         ], movespeed,  Cheight);
+	                            Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + b + 20 +16], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + b + 40 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + b + 60 +16], movespeed,  Cheight);
+								}
+}
+
+
+
+
+
+
+function void C3____Edge_Stroke(int Cheight, int Ftx, int Ctx)
+{
+for(int a = 1; a < 21; a ++)    {
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+								ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+							    ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+								ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+							    ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+							    ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+							    ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+								ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+							    ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+								ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+							    ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+								}
+for(int b = 1; b < 5; b ++)     {
+	                            ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ftx]);
+                                ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ftx]);
+								ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ftx]);
+								ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ftx]);
+                                ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ftx]);
+								ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ftx]);
+	                            ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ctx]);
+                                ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ctx]);
+								ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ctx]);
+								ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ctx]);
+                                ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ctx]);
+								ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ctx]);
+	                            Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + b + 20 +16], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + b + 40 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + b + 60 +16], movespeed,  Cheight);
+								}
+}
+
+function void C7____Edge_Stroke(int Cheight, int Ftx, int Ctx)
+{
+for(int a = 1; a < 21; a ++)    {
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+								ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + a         ], movespeed,  Cheight);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ftx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + a         ], flatTX[Ctx]);
+
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+							    ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+							    ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+
+								Ceiling_MoveToValue(order[4]*100 + dirSECTOR[(Direction*100) + a + 80    ], movespeed,  Cheight);
+							    ChangeFloor(order[4]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ftx]);
+							    ChangeCeiling(order[4]*100 + dirSECTOR[(Direction*100) + a + 80    ], flatTX[Ctx]);
+								}
+for(int b = 1; b < 5; b ++)     {
+	                            ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ftx]);
+                                ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ftx]);
+								ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ftx]);
+								ChangeFloor(order[1]*100 + dirSECTOR[(Direction*100) + b + 80    ], flatTX[Ftx]);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ftx]);
+                                ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ftx]);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ftx]);
+								ChangeFloor(order[2]*100 + dirSECTOR[(Direction*100) + b + 80 +16], flatTX[Ftx]);
+								ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + b +  0 +16], flatTX[Ftx]);
+								ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ftx]);
+                                ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ftx]);
+								ChangeFloor(order[3]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ftx]);
+								ChangeFloor(order[4]*100 + dirSECTOR[(Direction*100) + b +  0    ], flatTX[Ftx]);
+	                            ChangeFloor(order[4]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ftx]);
+                                ChangeFloor(order[4]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ftx]);
+								ChangeFloor(order[4]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ftx]);
+
+	                            ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ctx]);
+                                ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ctx]);
+								ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ctx]);
+								ChangeCeiling(order[1]*100 + dirSECTOR[(Direction*100) + b + 80    ], flatTX[Ctx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ctx]);
+                                ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ctx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ctx]);
+								ChangeCeiling(order[2]*100 + dirSECTOR[(Direction*100) + b + 80 +16], flatTX[Ctx]);
+								ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + b +  0 +16], flatTX[Ctx]);
+								ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + b + 20 +16], flatTX[Ctx]);
+                                ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + b + 40 +16], flatTX[Ctx]);
+								ChangeCeiling(order[3]*100 + dirSECTOR[(Direction*100) + b + 60 +16], flatTX[Ctx]);
+								ChangeCeiling(order[4]*100 + dirSECTOR[(Direction*100) + b +  0    ], flatTX[Ctx]);
+	                            ChangeCeiling(order[4]*100 + dirSECTOR[(Direction*100) + b + 20    ], flatTX[Ctx]);
+                                ChangeCeiling(order[4]*100 + dirSECTOR[(Direction*100) + b + 40    ], flatTX[Ctx]);
+								ChangeCeiling(order[4]*100 + dirSECTOR[(Direction*100) + b + 60    ], flatTX[Ctx]);
+
+	                            Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 20    ], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 40    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 60    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[1]*100 + dirSECTOR[(Direction*100) + b + 80    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + b + 20 +16], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + b + 40 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + b + 60 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[2]*100 + dirSECTOR[(Direction*100) + b + 80 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + b +  0 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + b + 20 +16], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + b + 40 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[3]*100 + dirSECTOR[(Direction*100) + b + 60 +16], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[4]*100 + dirSECTOR[(Direction*100) + b +  0    ], movespeed,  Cheight);
+	                            Ceiling_MoveToValue(order[4]*100 + dirSECTOR[(Direction*100) + b + 20    ], movespeed,  Cheight);
+                                Ceiling_MoveToValue(order[4]*100 + dirSECTOR[(Direction*100) + b + 40    ], movespeed,  Cheight);
+								Ceiling_MoveToValue(order[4]*100 + dirSECTOR[(Direction*100) + b + 60    ], movespeed,  Cheight);
+								}
+}
+
+
+
+function void C1____Seclude_Container(int tx)
+{
+for(int a = 1; a < 11; a ++)    {
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + a ] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + a] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + a ] +500, BLOCK_EVERYTHING);
+								}
+}
+
+
+
+
+
+function void C2____Seclude_Container(int tx)
+{
+
+for(int c = 1; c < 11; c ++)    {
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, BLOCK_EVERYTHING);
+								SetLineBlocking(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, BLOCK_EVERYTHING);
+								}
+}
+
+
+function void C3____Seclude_Container(int tx)
+{
+for(int c = 1; c < 11; c ++)    {
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture(order[3]*1000 + dirBlockWALL[(CloseWall[3]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[3]*1000 + dirBlockWALL[(CloseWall[3]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, BLOCK_EVERYTHING);
+								SetLineBlocking(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, BLOCK_EVERYTHING);
+								SetLineBlocking(order[3]*1000 + dirBlockWALL[(CloseWall[3]*10)  + c] +500, BLOCK_EVERYTHING);
+								}
+}
+
+function void C7____Seclude_Container(int tx)
+{
+for(int c = 1; c < 11; c ++)    {
+							    SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture(order[3]*1000 + dirBlockWALL[(CloseWall[3]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[3]*1000 + dirBlockWALL[(CloseWall[3]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineTexture(order[4]*1000 + dirBlockWALL[(CloseWall[4]*10)  + c] +500, SIDE_FRONT, TEXTURE_MIDDLE, wallTX[tx]); SetLineTexture(order[4]*1000 + dirBlockWALL[(CloseWall[4]*10)  + c] +500, SIDE_BACK, TEXTURE_MIDDLE, wallTX[tx]);
+								SetLineBlocking(order[1]*1000 + dirBlockWALL[(CloseWall[1]*10)  + c] +500, BLOCK_EVERYTHING);
+								SetLineBlocking(order[2]*1000 + dirBlockWALL[(CloseWall[2]*10)  + c] +500, BLOCK_EVERYTHING);
+								SetLineBlocking(order[3]*1000 + dirBlockWALL[(CloseWall[3]*10)  + c] +500, BLOCK_EVERYTHING);
+								SetLineBlocking(order[4]*1000 + dirBlockWALL[(CloseWall[4]*10)  + c] +500, BLOCK_EVERYTHING);
+								}
+}
+
+
+
+/*
+		  |    	             |    	             |    	             |    	             |    	             |
+          |    	             |    	             |    	             |    	             |    	             |
+               	             |    	                  	             |    	             |
+          |    	             |    	             |    	             |    	             |    	             |
+	      |    	             |    	             |    	             |    	             |    	             |
+----  ----         ----------          ----------          ----  ----                                                  ----------             ----  ----
+
+    1                   2                  3                     4               5                   6                      7                     8                    9
+*/
+function void Seclude_Container(void)
+{
+int EastGate = random(2,4);
+int SouthGate = random(2,4);
+int wallcounter;
+
+
+int counter = 1;
+
+while(counter < blocknum + 1)
+  {
+     switch(blockertype[counter])
+     {
+        CASE 1:
+		//east
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			     if (wallcounter != EastGate) SetBorderWall(1, counter, wallcounter);
+			                               else SetEntrance(1, counter, wallcounter);
+			   wallcounter++;
+			 }
+		//south
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			     if (wallcounter != SouthGate) SetBorderWall(2, counter, wallcounter);
+			                                else SetEntrance(2, counter, wallcounter);
+			   wallcounter++;
+			 }
+        break;
+
+
+
+
+        CASE 2:
+		//east
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			   SetBorderWall(1, counter, wallcounter);
+			   wallcounter++;
+			 }
+		//south
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+               SetBorderWall(2, counter, wallcounter);
+			   wallcounter++;
+			 }
+        break;
+
+
+
+
+		CASE 3:
+		//east
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			     if (wallcounter != EastGate) SetBorderWall(1, counter, wallcounter);
+			                               else SetEntrance(1, counter, wallcounter);
+			   wallcounter++;
+			 }
+		//south
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+               SetBorderWall(2, counter, wallcounter);
+			   wallcounter++;
+			 }
+        break;
+
+
+
+
+		CASE 4:
+		//east
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			   SetBorderWall(1, counter, wallcounter);
+			   wallcounter++;
+			 }
+		//south
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			     if (wallcounter != SouthGate) SetBorderWall(2, counter, wallcounter);
+			                                else SetEntrance(2, counter, wallcounter);
+			   wallcounter++;
+			 }
+        break;
+
+
+
+
+
+        CASE 5:
+		//east
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			   SetBorderWall(1, counter, wallcounter);
+			   wallcounter++;
+			 }
+        break;
+
+
+
+
+
+        CASE 6:
+		//east
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			     if (wallcounter != EastGate) SetBorderWall(1, counter, wallcounter);
+			                               else SetEntrance(1, counter, wallcounter);
+			   wallcounter++;
+			 }
+		break;
+
+
+
+
+        CASE 7:
+		//south
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+               SetBorderWall(2, counter, wallcounter);
+			   wallcounter++;
+			 }
+        break;
+
+
+
+
+        CASE 8:
+		//south
+		  wallcounter = 1;
+		   while(wallcounter < 6)
+		     {
+			     if (wallcounter != SouthGate) SetBorderWall(2, counter, wallcounter);
+			                                else SetEntrance(2, counter, wallcounter);
+			   wallcounter++;
+			 }
+        break;
+
+
+
+        CASE 9:
+        break;
+     }
+
+  counter++;
+  }
+
+}
+
+
+function void SetBorderWall(int side, int counter, int wallcounter)
+{
+	 if (side == 1)
+{
+if ((order[counter] != 8) && (order[counter] != 16) && (order[counter] != 24) && (order[counter] != 32) && (order[counter] != 40) && (order[counter] != 48) && (order[counter] != 56) && (order[counter] != 64))
+    {
+    SetLineBlocking(order[counter]*1000 + 500 + wallcounter, BLOCK_EVERYTHING);
+	if  (order[counter] > 32)
+        SpawnSpotForced(bugwall, order[counter]*100 + (wallcounter*5), 0, 0);
+	else
+	    {
+		SetLineTexture(order[counter]*1000 + 500 + wallcounter, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[1]);
+        SetLineTexture(order[counter]*1000 + 500 + wallcounter, SIDE_BACK , TEXTURE_MIDDLE, WALLTX[1]);
+		}
+	}
+	if (order[counter] == 6)
+	{
+	SetLineTexture(order[counter]*1000 + 500 + wallcounter, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[4]);
+    SetLineTexture(order[counter]*1000 + 500 + wallcounter, SIDE_BACK , TEXTURE_MIDDLE, WALLTX[4]);
+	}
+}
+else if (side == 2)
+{
+	if (order[counter] < 57)
+	{
+    SetLineBlocking(order[counter]*1000 + 510 + wallcounter, BLOCK_EVERYTHING);
+	if  (order[counter] > 32)
+    SpawnSpotForced(bugwall, order[counter]*100 + 20 + wallcounter, 0, 192);
+	else
+	    {
+		SetLineTexture(order[counter]*1000 + 510 + wallcounter, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[1]);
+        SetLineTexture(order[counter]*1000 + 510 + wallcounter, SIDE_BACK , TEXTURE_MIDDLE, WALLTX[1]);
+		}
+	}
+	if (order[counter] == 6)
+	{
+	SetLineTexture(order[counter]*1000 + 510 + wallcounter, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[4]);
+    SetLineTexture(order[counter]*1000 + 510 + wallcounter, SIDE_BACK , TEXTURE_MIDDLE, WALLTX[4]);
+	}
+}
+}
+
+
+
+
+
+function void SetEntrance(int side, int counter, int wallcounter)
+{
+	 if (side == 1)
+{
+if ((order[counter] != 8) && (order[counter] != 16) && (order[counter] != 24) && (order[counter] != 32) && (order[counter] != 40) && (order[counter] != 48) && (order[counter] != 56) && (order[counter] != 64))
+    {
+    SetLineBlocking(order[counter]*1000 + 500 + wallcounter, BLOCK_NOTHING);
+    SpawnSpotForced(interpass, order[counter]*100 + (wallcounter*5), 20000 + ENTRYnum, 128); ENTRYnum++;
+	SpawnSpotForced("Mapspot", order[counter]*100 + (wallcounter*5) + 96, 20000 + ENTRYnum, 0);
+	}
+}
+else if (side == 2)
+{
+	if (order[counter] < 57)
+	{
+    SetLineBlocking(order[counter]*1000 + 510 + wallcounter, BLOCK_NOTHING);
+    SpawnSpotForced(interpass, order[counter]*100 + 20 + wallcounter, 20000 + ENTRYnum, 64); ENTRYnum++;
+	SpawnSpotForced("Mapspot", order[counter]*100  + 20 + wallcounter + 780, 20000 + ENTRYnum, 0);
+	}
+}
+ENTRYnum++;
+}
+
+
+
+
+
+
+
+#libdefine loadel 1
+
+Script "Container" (int GotoConType)
+{
+int counter;
+int RNG;
+int SetTrapAt;
+int Execute = GotoConType*10 + random(1,3);
+
+switch(Execute)
+{
+CASE 0://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 0
+C1____Edge_Stroke(1, BaseFloorHeight, BaseCeilingHeight, 2, 2);
+C1____Seclude_Container(1);
+break;
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+B   - - - - -          V   - - - - -
+L   - • - • -          I   - - ^ - -
+O   - - - - -          S   - < - > -
+C   - • - • -          U   - - v - -
+K   - - - - -          A   - - - - -
+                       L
+	   all		            ceiling
+
+*/
+
+CASE 11://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 11
+
+
+//GEOMETRY
+RNG = random(0,1);
+if (RNG > 0) C1____Edge_Stroke(1, BaseFloorHeight, BaseCeilingHeight + random(-1,1)*8*random(0,16), random(1,2), random(2,4));
+        else C1____Edge_Stroke(1, BaseFloorHeight, BaseCeilingHeight + random(-1,1)*8*random(0,16), 5, random(2,4));
+
+			 BASE____Floor64(1, 4, 2048, 25, random(1,2));  RNG = random(0,1); delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+if (RNG > 0) BASE____Floor64(1, 4, 2048, 33, random(1,2));      else BASE____Ceiling64(1, 2, 64, 35, 3);  RNG = random(0,1); delay(loadel);
+if (RNG > 0) BASE____Floor64(1, 4, 2048, 65, random(1,2));      else BASE____Ceiling64(1, 2, 64, 65, 3);  RNG = random(0,1); delay(loadel);
+if (RNG > 0) BASE____Floor64(1, 4, 2048, 73, random(1,2));      else BASE____Ceiling64(1, 2, 64, 74, 3);  delay(loadel);
+
+BASE____Ceiling64(1, 2, 64, 35, 2); delay(loadel);
+BASE____Ceiling64(1, 2, 64, 65, 2); delay(loadel);
+BASE____Ceiling64(1, 2, 64, 74, 2); delay(loadel);
+
+BASE____Ceiling64(1, 4, 64, 45, 2); delay(loadel);
+BASE____Ceiling64(1, 4, 64, 69, 2); delay(loadel);
+BASE____Ceiling64(1, 4, 64, 53, 2); delay(loadel);
+BASE____Ceiling64(1, 4, 64, 29, 2); delay(loadel);
+BASE____Ceiling64(1, 4, (72 + 8*random(0,2)), 49, random(11,13)); delay(loadel);
+
+//VISUALS
+RNG = random(0,10); if ((RNG > 7) && (mdilights == true)) {BASE____Light(1, 13, /*size*/random(1,2),  /*R*/1,3,  /*G*/1,5,  /*B*/1,5 );}
+VisualAt[0] = 13; VisualAt[1] = 18; VisualAt[2] = 21;
+GoreSpawn(1, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 69; trap[2] = 28;
+BASE____SetTrap(1, trap[random(1,2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +   5]; SetQuestLine(QuestLine[order[1]][1]);
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) + 104]; SetQuestLine(QuestLine[order[1]][2]);
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  81]; SetQuestLine(QuestLine[order[1]][3]);
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) +  34]; SetQuestLine(QuestLine[order[1]][4]);
+
+//TELEPORT
+SetTelepoint(1,    3);
+
+break;
+
+
+
+
+
+
+/*
+B   - - - - -          V   - - - - -
+L   - - • - -          I   - - ^ - -
+O   - • • • -          S   - < - > -
+C   - - • - -          U   - - v - -
+K   - - - - -          A   - - - - -
+                       L
+	   all		            ceiling
+
+*/
+CASE 12://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 12
+
+
+//GEOMETRY
+RNG = random(0,1);
+int RNGtxA = random(0,1);
+C1____Edge_Stroke(1, BaseFloorHeight, BaseCeilingHeight + random(-1,1)*8*random(0,16), random(1,2), random(2,4)); delay(loadel);
+
+
+
+BASE____Floor64(1, 4, 2048, 49, 1);
+
+if (RNG > 0) {
+	         BASE____Floor64(1, 1, 2048, 55, 1); delay(loadel);
+			 BASE____Floor64(1, 1, 2048, 70, 1); delay(loadel);
+			 BASE____Floor64(1, 1, 2048, 45, 1); delay(loadel);
+			 BASE____Floor64(1, 1, 2048, 32, 1); delay(loadel);
+			 RNG = random(0,1);
+			 }
+if (RNG > 0) BASE____Floor64(1, 4, 2048, 29, 1); RNG = random(0,1); delay(loadel);
+if (RNG > 0) BASE____Floor64(1, 4, 2048, 53, 1); RNG = random(0,1); delay(loadel);
+if (RNG > 0) BASE____Floor64(1, 4, 2048, 69, 1); RNG = random(0,1); delay(loadel);
+if (RNG > 0) BASE____Floor64(1, 4, 2048, 45, 1); RNG = random(0,1); delay(loadel);
+
+if (RNG > 0)
+BASE____Floor64(1, 4, -4, 25, 4+RNGtxA); delay(loadel);
+BASE____Floor64(1, 4, -4, 29, 4+RNGtxA); delay(loadel);
+BASE____Floor64(1, 4, -4, 33, 4+RNGtxA); delay(loadel);
+BASE____Floor64(1, 4, -4, 45, 4+RNGtxA); delay(loadel);
+BASE____Floor64(1, 4, -4, 53, 4+RNGtxA); delay(loadel);
+BASE____Floor64(1, 4, -4, 65, 4+RNGtxA); delay(loadel);
+BASE____Floor64(1, 4, -4, 69, 4+RNGtxA); delay(loadel);
+BASE____Floor64(1, 4, -4, 73, 4+RNGtxA); delay(loadel);
+
+//VISUALS
+VisualAt[0] = 1; VisualAt[1] = 10; VisualAt[2] = 16;
+GoreSpawn(1, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 5; trap[2] = 139;
+BASE____SetTrap(1, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) + 121]; SetQuestLine(QuestLine[order[1]][1]);
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  28]; SetQuestLine(QuestLine[order[1]][2]);
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  86]; SetQuestLine(QuestLine[order[1]][3]);
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 126]; SetQuestLine(QuestLine[order[1]][4]);
+
+//TELEPORT
+SetTelepoint(1,    2);
+
+break;
+
+
+
+
+
+CASE 13://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 13
+
+
+//GEOMETRY
+
+
+BASE____Ceiling64(1, 4, BaseFloorHeight, 1, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight, 17, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight, 81, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight, 97, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight, 25, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight, 33, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight, 65, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight, 73, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+RNG = random(32,128);
+BASE____Ceiling64(1, 4, BaseFloorHeight+RNG, 29, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight+RNG, 45, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight+RNG, 49, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight+RNG, 53, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+BASE____Ceiling64(1, 4, BaseFloorHeight+RNG, 69, 11); /*(int ordernum, int numoftris, int value, int origin, int tx)*/ delay(loadel);
+//VISUALS
+
+//VISUALS
+VisualAt[0] = 12; VisualAt[1] = 8; VisualAt[2] = 13;
+GoreSpawn(1, VisualAt[random(0,2)]);
+
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) + 46]; SetQuestLine(QuestLine[order[1]][1]);
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) + 69]; SetQuestLine(QuestLine[order[1]][2]);
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) + 81]; SetQuestLine(QuestLine[order[1]][3]);
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 75]; SetQuestLine(QuestLine[order[1]][4]);
+
+//TELEPORT
+SetTelepoint(1,    2);
+
+break;
+
+
+
+
+
+
+
+
+
+
+
+CASE 21://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 21
+
+C2____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,16), random(1,2), random(2,4));
+
+//BASE____Column64(1, 77,   1, random(3,4), 1, random(3,4));
+//BASE____Column64(2, 59,   1, random(3,4), 1, random(3,4));
+//BASE____Column64(2, 65,   1, random(3,4), 1, random(3,4));
+BASE____Floor64(1, 4, 2048/*GetSectorCeilingZ(order[1]*100 + dirSECTOR[(Direction*100) + 53], 0, 0)*/, 53, 4+RNGtxA);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(1, 4, 2048, 57, 4+RNGtxA);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(2, 4, 2048, 41, 4+RNGtxA);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(2, 4, 2048, 45, 4+RNGtxA);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+RNG = random(0,1);
+if (RNG > 0) BASE____Floor64(1, 2, 2048, 2, 4+RNGtxA);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/ RNG = random(0,1); delay(loadel);
+if (RNG > 0) BASE____Floor64(1, 2, 2048, 83, 4+RNGtxA);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/ RNG = random(0,1); delay(loadel);
+if (RNG > 0) BASE____Floor64(2, 2, 2048, 17, 4+RNGtxA);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/ RNG = random(0,1); delay(loadel);
+
+//VISUALS
+VisualAt[0] = 18; VisualAt[1] = 37; VisualAt[2] = 25;
+             GoreSpawn(1, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(1, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 125; trap[2] = 115;
+BASE____SetTrap(1, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  69]; SetQuestLine(QuestLine[order[1]][1]);
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  23]; SetQuestLine(QuestLine[order[1]][2]);
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  11]; SetQuestLine(QuestLine[order[1]][3]);
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 130]; SetQuestLine(QuestLine[order[1]][4]);
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +   5]; SetQuestLine(QuestLine[order[2]][1]);
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) +  17]; SetQuestLine(QuestLine[order[2]][2]);
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) + 81]; SetQuestLine(QuestLine[order[2]][3]);
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) + 125]; SetQuestLine(QuestLine[order[2]][4]);
+
+//TELEPORT
+SetTelepoint(1,    12);
+SetTelepoint(2,    5);
+
+break;
+
+
+
+
+
+
+
+CASE 22://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 22
+
+C2____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,6), random(1,2), 3);
+//BASE____Rhombus64B(1, 111,  1, random(3,4), random(3,4), 1);  /*(int ordernum, int origin, int tx, int tx2, int tx3, int tx4)*/
+//BASE____Rhombus64B(1, 76,  1, random(3,4), random(3,4), 1);  /*(int ordernum, int origin, int tx, int tx2, int tx3, int tx4)*/
+//BASE____Rhombus64B(2, 111,  1, random(3,4), random(3,4), 1);  /*(int ordernum, int origin, int tx, int tx2, int tx3, int tx4)*/
+//BASE____Rhombus64B(2, 76,  1, random(3,4), random(3,4), 1);  /*(int ordernum, int origin, int tx, int tx2, int tx3, int tx4)*/
+
+BASE____VerticalRow(1, 8,  BaseCeilingHeight+8,  1, 1, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/ delay(loadel);
+BASE____VerticalRow(1, 16, BaseCeilingHeight+16, 5, 2, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(1, 24, BaseCeilingHeight+24,  9, 1, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(1, 32, BaseCeilingHeight+32, 13, 2, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(1, 40, BaseCeilingHeight+40, 17, 1, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+RNG = random(0,1);
+if (RNG > 0)
+{
+BASE____VerticalRow(2, 64, BaseCeilingHeight+128,  5, 1, 1); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(2, 80, BaseCeilingHeight+128, 9, 2, 1); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(2, 96, BaseCeilingHeight+128, 13, 1, 1); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+delay(1);
+BASE____VerticalRow(2, 40,  BaseCeilingHeight+40,  1, 1, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+delay(1);
+C1____Edge_Stroke(2, BaseFloorHeight, BaseCeilingHeight + random(-1,1)*8*random(0,4), random(1,2), 3);delay(loadel);
+}
+else
+{
+//BASE____HorizontalRow(2, 40, BaseCeilingHeight+40, 21, 16, 2, 11); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/
+//BASE____HorizontalRow(2, 40, BaseCeilingHeight+40, 41, 16, 1, 11); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/
+//BASE____HorizontalRow(2, 40, BaseCeilingHeight+40, 61, 16, 2, 11); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/
+BASE____VerticalRow(2, 40,  BaseCeilingHeight+40,  1, 1, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(2, 32, BaseCeilingHeight+32, 5, 2, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(2, 24, BaseCeilingHeight+24,  9, 1, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(2, 16, BaseCeilingHeight+16, 13, 2, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+BASE____VerticalRow(2, 8, BaseCeilingHeight+8, 17, 1, 4); /*(int ordernum, int Fvalue, int Cvalue, int origin, int endloop, int Ftx, int Ctx)*/delay(loadel);
+}
+RNG = random(0,1);
+if (RNG > 0)  BASE____Floor64(1, 4, 2048, 49, 1); delay(loadel);
+RNG = random(0,1);
+if (RNG > 0)  BASE____Floor64(2, 4, 2048, 49, 1); delay(loadel);
+
+
+//VISUALS
+VisualAt[0] = 12; VisualAt[1] = 1; VisualAt[2] = 23;
+             GoreSpawn(2, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(2, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 121; trap[2] = 86;
+BASE____SetTrap(1, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  46]; SetQuestLine(QuestLine[order[1]][1]);
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) + 125]; SetQuestLine(QuestLine[order[1]][2]);
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[1]][3]);
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 115]; SetQuestLine(QuestLine[order[1]][4]);
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  52]; SetQuestLine(QuestLine[order[2]][1]);
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[2]][2]);
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) +  63]; SetQuestLine(QuestLine[order[2]][3]);
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) +  28]; SetQuestLine(QuestLine[order[2]][4]);
+
+//TELEPORT
+SetTelepoint(1,    20);
+SetTelepoint(2,    19);
+
+break;
+
+
+
+CASE 23://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 21
+
+C2____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,16), random(1,2), random(2,4));delay(loadel);
+
+//BASE____Column64(1, 77,   1, random(3,4), 1, random(3,4));
+//BASE____Column64(2, 59,   1, random(3,4), 1, random(3,4));
+//BASE____Column64(2, 65,   1, random(3,4), 1, random(3,4));
+BASE____Floor64(1, 4, 2048, 17, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(1, 4, 2048, 37, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(1, 4, 2048, 57, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(1, 4, 2048, 97, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+
+BASE____Floor64(1, 1, 2048, 65, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(1, 1, 2048, 71, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(1, 1, 2048, 29, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(1, 1, 2048, 35, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+
+BASE____Floor64(2, 4, 2048, 1, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(2, 4, 2048, 21, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(2, 4, 2048, 41, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+BASE____Floor64(2, 4, 2048, 81, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+
+BASE____Floor64(2, 4, 2048, 33, 1);  delay(loadel);//(int ordernum, int numoftris, int value, int origin, int tx)
+
+RNG = random(0,1);
+if (RNG > 0) BASE____Floor64(1, 2, 2048, 2, 4+RNGtxA);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/ RNG = random(0,1);
+if (RNG > 0) BASE____Floor64(1, 2, 2048, 83, 4+RNGtxA);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/ RNG = random(0,1);
+if (RNG > 0) BASE____Floor64(2, 2, 2048, 17, 4+RNGtxA);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/ RNG = random(0,1);
+
+//VISUALS
+VisualAt[0] = 16; VisualAt[1] = 22; VisualAt[2] = 4;
+             GoreSpawn(2, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(2, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 115; trap[2] = 75;
+BASE____SetTrap(1, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  75]; SetQuestLine(QuestLine[order[1]][1]);
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  81]; SetQuestLine(QuestLine[order[1]][2]);
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  92]; SetQuestLine(QuestLine[order[1]][3]);
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 135]; SetQuestLine(QuestLine[order[1]][4]);
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  81]; SetQuestLine(QuestLine[order[2]][1]);
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[2]][2]);
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) +  69]; SetQuestLine(QuestLine[order[2]][3]);
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[2]][4]);
+
+//TELEPORT
+SetTelepoint(1,    22);
+SetTelepoint(2,    18);
+
+break;
+
+
+
+
+
+
+
+
+
+CASE 31://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 31
+C3____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,16), 5, 5);delay(loadel);
+//BASE____Floor64(1, 4, 2048, 93, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/
+//BASE____Floor64(1, 4, 2048, 73, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/
+//BASE____Floor64(1, 4, 2048, 69, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/
+
+//BASE____Floor64(1, 4, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/
+//BASE____Floor64(1, 4, 2048, 29, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/
+//BASE____Floor64(1, 4, 2048,  9, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/
+BASE____Floor64(1, 4, 2048, 65, 1); delay(loadel);
+BASE____Floor64(1, 4, 2048, 69, 1); delay(loadel);
+BASE____Floor64(1, 4, 2048, 73, 1); delay(loadel);
+BASE____Floor64(1, 4, 2048, 25, 1); delay(loadel);
+BASE____Floor64(1, 4, 2048, 29, 1); delay(loadel);
+BASE____Floor64(1, 4, 2048, 33, 1); delay(loadel);
+
+BASE____Floor64(2, 4, 2048, 1, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 17, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 49, 1); delay(loadel);
+BASE____Floor64(2, 4, 2048, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 97, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, 2048, 17, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+//VISUALS
+VisualAt[0] = 13; VisualAt[1] = 5; VisualAt[2] = 22;
+             GoreSpawn(1, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(1, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 69; trap[2] = 104;
+BASE____SetTrap(2, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  28]; SetQuestLine(QuestLine[order[1]][1]); //45
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  69]; SetQuestLine(QuestLine[order[1]][2]); //115
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  86]; SetQuestLine(QuestLine[order[1]][3]); //145
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 130]; SetQuestLine(QuestLine[order[1]][4]); //225
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  34]; SetQuestLine(QuestLine[order[2]][1]); //55
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) +  81]; SetQuestLine(QuestLine[order[2]][2]); //135
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) + 115]; SetQuestLine(QuestLine[order[2]][3]); //195
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) + 125]; SetQuestLine(QuestLine[order[2]][4]); //215
+QuestLine[order[3]][1] = order[3]*1000 + dirLine[(Direction*140) +  23]; SetQuestLine(QuestLine[order[3]][1]); //35
+QuestLine[order[3]][2] = order[3]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[3]][2]); //65
+QuestLine[order[3]][3] = order[3]*1000 + dirLine[(Direction*140) +  57]; SetQuestLine(QuestLine[order[3]][3]); //95
+QuestLine[order[3]][4] = order[3]*1000 + dirLine[(Direction*140) + 104]; SetQuestLine(QuestLine[order[3]][4]); //175
+
+//TELEPORT
+SetTelepoint(1,    1);
+SetTelepoint(2,    11);
+SetTelepoint(3,    7);
+
+break;
+
+
+CASE 32://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 32
+C3____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,16), 5, random(2,3));delay(loadel);
+BASE____Floor64(1, 1, 2048, 55, 1);       BASE____Floor64(1, 1, 2048, 49, 1);      delay(loadel);
+BASE____Floor64(2, 1, 2048, 55, 1);       BASE____Floor64(2, 1, 2048, 49, 1);      delay(loadel);
+BASE____Floor64(3, 1, 2048, 55, 1);       BASE____Floor64(3, 1, 2048, 49, 1);      delay(loadel);
+
+BASE____Floor64(1, 4, 2048, 17, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 97, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048,  1, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 17, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 97, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048,  1, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+//VISUALS
+VisualAt[0] = 6; VisualAt[1] = 24; VisualAt[2] = 17;
+             GoreSpawn(2, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(2, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 38; trap[2] = 93;
+BASE____SetTrap(3, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[1]][1]); //65
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  51]; SetQuestLine(QuestLine[order[1]][2]); //84
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) + 121]; SetQuestLine(QuestLine[order[1]][3]); //206
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[1]][4]); //185
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  38]; SetQuestLine(QuestLine[order[2]][1]); //63
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) +  52]; SetQuestLine(QuestLine[order[2]][2]); //85
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) +  99]; SetQuestLine(QuestLine[order[2]][3]); //166
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) + 109]; SetQuestLine(QuestLine[order[2]][4]); //184
+QuestLine[order[3]][1] = order[3]*1000 + dirLine[(Direction*140) +  34]; SetQuestLine(QuestLine[order[3]][1]); //55
+QuestLine[order[3]][2] = order[3]*1000 + dirLine[(Direction*140) +  53]; SetQuestLine(QuestLine[order[3]][2]); //86
+QuestLine[order[3]][3] = order[3]*1000 + dirLine[(Direction*140) +  68]; SetQuestLine(QuestLine[order[3]][3]); //114
+QuestLine[order[3]][4] = order[3]*1000 + dirLine[(Direction*140) + 109]; SetQuestLine(QuestLine[order[3]][4]); //184
+
+//TELEPORT
+SetTelepoint(1,    7);
+SetTelepoint(2,    16);
+SetTelepoint(3,    25);
+
+break;
+
+
+CASE 33://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 33
+C3____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,16), 5, random(2,3));
+
+BASE____Floor64(1, 4, 2048, 17, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 37, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 2, 2048, 58, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 2, 2048, 53, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 1, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 1, 2048, 36, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048,  1, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 2, 2048, 22, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, 2048, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 61, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 2, 2048, 47, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 2, 2048, 66, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 1, 2048, 41, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 1, 2048, 44, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 97, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 1, 2048, 77, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 1, 2048, 80, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+//VISUALS
+VisualAt[0] = 13; VisualAt[1] = 16; VisualAt[2] = 25;
+             GoreSpawn(1, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(1, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 28; trap[2] = 61;
+BASE____SetTrap(2, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  23]; SetQuestLine(QuestLine[order[1]][1]); //35
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  69]; SetQuestLine(QuestLine[order[1]][2]); //115
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  98]; SetQuestLine(QuestLine[order[1]][3]); //165
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 115]; SetQuestLine(QuestLine[order[1]][4]); //195
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[2]][1]); //65
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) +  52]; SetQuestLine(QuestLine[order[2]][2]); //85
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) +  98]; SetQuestLine(QuestLine[order[2]][3]); //165
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[2]][4]); //185
+QuestLine[order[3]][1] = order[3]*1000 + dirLine[(Direction*140) +  17]; SetQuestLine(QuestLine[order[3]][1]); //25
+QuestLine[order[3]][2] = order[3]*1000 + dirLine[(Direction*140) +  52]; SetQuestLine(QuestLine[order[3]][2]); //85
+QuestLine[order[3]][3] = order[3]*1000 + dirLine[(Direction*140) + 104]; SetQuestLine(QuestLine[order[3]][3]); //175
+QuestLine[order[3]][4] = order[3]*1000 + dirLine[(Direction*140) + 115]; SetQuestLine(QuestLine[order[3]][4]); //195
+
+//TELEPORT
+SetTelepoint(1,    7);
+SetTelepoint(2,    13);
+SetTelepoint(3,    8);
+
+break;
+
+
+CASE 71://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 33
+C7____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,4), 5, 5); /*(int Cheight, int Ftx, int Ctx)*/
+
+RNG = random(-1,0); if (RNG == 0) RNG = 1;
+//1
+BASE____Floor64(1, 4, BaseFloorHeight+16*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+16*RNG, 29, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+16*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+16*RNG, 37, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+16*RNG, 45, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+16*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+16*RNG, 85, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+16*RNG, 21, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+16*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+16*RNG, 29, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+16*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+16*RNG, 53, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+16*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+16*RNG, 93, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, BaseFloorHeight+16*RNG, 13, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+16*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+16*RNG, 53, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+16*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+16*RNG, 69, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+16*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+16*RNG, 61, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+16*RNG, 77, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+16*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+16*RNG, 69, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+16*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+16*RNG, 45, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+16*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+16*RNG,  5, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+//2
+BASE____Floor64(1, 4, BaseFloorHeight+32*RNG, 49, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+32*RNG, 53, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+32*RNG, 57, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+32*RNG, 69, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+32*RNG, 89, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+32*RNG, 41, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+32*RNG, 45, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+32*RNG, 49, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+32*RNG, 69, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+32*RNG, 89, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, BaseFloorHeight+32*RNG,  9, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+32*RNG, 29, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+32*RNG, 49, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+32*RNG, 45, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+32*RNG, 41, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+32*RNG, 57, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+32*RNG, 53, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+32*RNG, 49, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+32*RNG, 29, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+32*RNG,  9, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+
+//3
+BASE____Floor64(1, 4, BaseFloorHeight+48*RNG, 93, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+48*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, BaseFloorHeight+48*RNG, 77, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(2, 4, BaseFloorHeight+48*RNG, 61, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+48*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, BaseFloorHeight+48*RNG, 85, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, BaseFloorHeight+48*RNG,  5, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+48*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, BaseFloorHeight+48*RNG, 21, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(4, 4, BaseFloorHeight+48*RNG, 37, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+48*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, BaseFloorHeight+48*RNG, 13, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+//4
+BASE____Floor64(1, 4, 2048, 97, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(2, 4, 2048, 81, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, 2048,  1, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(4, 4, 2048, 17, 5);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+delay(5);
+BASE____Floor64(1, 2, 2048, 93, 2);  BASE____Floor64(1, 2, 2048, 79, 2);delay(loadel);
+BASE____Floor64(2, 2, 2048, 86, 2);  BASE____Floor64(2, 1, 2048, 61, 2);  BASE____Floor64(2, 1, 2048, 64, 2);delay(loadel);
+BASE____Floor64(3, 2, 2048,  7, 2);  BASE____Floor64(3, 2, 2048, 21, 2);delay(loadel);
+BASE____Floor64(4, 2, 2048, 38, 2);  BASE____Floor64(4, 1, 2048, 13, 2);  BASE____Floor64(4, 1, 2048, 16, 2);delay(loadel);
+RNG = random(0,1);
+/*
+if (RNG > 0) { BASE____Column64(1, 106,   1, 1, 1, 1); RNG = random(0,1);}
+if (RNG > 0) { BASE____Column64(2, 94,   1, 1, 1, 1); RNG = random(0,1);}
+if (RNG > 0) { BASE____Column64(3, 36,   1, 1, 1, 1); RNG = random(0,1);}
+if (RNG > 0) { BASE____Column64(4, 48,   1, 1, 1, 1);}
+*/
+
+BASE____Floor64(1, 4, 2048, 73, 1); delay(loadel);
+BASE____Floor64(2, 4, 2048, 65, 1); delay(loadel);
+BASE____Floor64(3, 4, 2048, 25, 1); delay(loadel);
+BASE____Floor64(4, 4, 2048, 33, 1); delay(loadel);
+
+BASE____Ceiling64(1, 4, BaseCeilingHeight-16*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-16*RNG, 29, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-16*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-16*RNG, 37, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-16*RNG, 45, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-16*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-16*RNG, 85, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-16*RNG, 21, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-16*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-16*RNG, 29, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-16*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-16*RNG, 53, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-16*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-16*RNG, 93, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Ceiling64(3, 4, BaseCeilingHeight-16*RNG, 13, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-16*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-16*RNG, 53, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-16*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-16*RNG, 69, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-16*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-16*RNG, 61, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-16*RNG, 77, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-16*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-16*RNG, 69, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-16*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-16*RNG, 45, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-16*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-16*RNG,  5, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+//2
+BASE____Ceiling64(1, 4, BaseCeilingHeight-32*RNG, 49, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-32*RNG, 53, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-32*RNG, 57, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-32*RNG, 69, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-32*RNG, 89, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-32*RNG, 41, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-32*RNG, 45, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-32*RNG, 49, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-32*RNG, 69, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-32*RNG, 89, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Ceiling64(3, 4, BaseCeilingHeight-32*RNG,  9, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-32*RNG, 29, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-32*RNG, 49, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-32*RNG, 45, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-32*RNG, 41, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-32*RNG, 57, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-32*RNG, 53, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-32*RNG, 49, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-32*RNG, 29, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-32*RNG,  9, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+
+//3
+BASE____Ceiling64(1, 4, BaseCeilingHeight-48*RNG, 93, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-48*RNG, 73, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(1, 4, BaseCeilingHeight-48*RNG, 77, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Ceiling64(2, 4, BaseCeilingHeight-48*RNG, 61, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-48*RNG, 65, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight-48*RNG, 85, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Ceiling64(3, 4, BaseCeilingHeight-48*RNG,  5, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-48*RNG, 25, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight-48*RNG, 21, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Ceiling64(4, 4, BaseCeilingHeight-48*RNG, 37, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-48*RNG, 33, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight-48*RNG, 13, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+delay(1);
+
+RNG = random(0,1);
+{
+if (RNG == 0)
+  {
+             {BASE____Floor64(1, 1, 2048, 55, 1);     BASE____Floor64(1, 1, 2048, 49, 1); RNG = random(0,1);}
+if (RNG > 0) {BASE____Floor64(2, 1, 2048, 55, 1);     BASE____Floor64(2, 1, 2048, 49, 1); RNG = random(0,1);}
+if (RNG > 0) {BASE____Floor64(3, 1, 2048, 55, 1);     BASE____Floor64(3, 1, 2048, 49, 1); RNG = random(0,1);}
+if (RNG > 0) {BASE____Floor64(1, 1, 2048, 55, 1);     BASE____Floor64(1, 1, 2048, 49, 1);}
+  }
+else
+  {
+	         BASE____Floor64(1, 1, 2048, 88, 1);  BASE____Floor64(4, 1, 2048,  6, 1);  RNG = random(0,1);
+if (RNG > 0) {BASE____Floor64(1, 1, 2048, 57, 1);  BASE____Floor64(2, 1, 2048,  43, 1);  RNG = random(0,1);}
+if (RNG > 0) {BASE____Floor64(2, 1, 2048, 96, 1);  BASE____Floor64(3, 1, 2048,  14, 1);  RNG = random(0,1);}
+if (RNG > 0) {BASE____Floor64(3, 1, 2048, 43, 1);  BASE____Floor64(4, 1, 2048,  57, 1);}
+  }
+}
+
+//VISUALS
+VisualAt[0] = 12; VisualAt[1] = 18; VisualAt[2] = 5;
+             GoreSpawn(1, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(1, VisualAt[random(0,2)]);
+
+/*//TRAP
+RNG = random(0,5);if (RNG == 0)
+trap[1] = 28; trap[2] = 61; SetTrapAt = Trap[random(1, 2)];
+BASE____SetTrap(2, SetTrapAt);*/
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  51]; SetQuestLine(QuestLine[order[1]][1]); //84
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  80]; SetQuestLine(QuestLine[order[1]][2]); //134
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  75]; SetQuestLine(QuestLine[order[1]][3]); //125
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 104]; SetQuestLine(QuestLine[order[1]][4]); //175
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  28]; SetQuestLine(QuestLine[order[2]][1]); //45
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) +  76]; SetQuestLine(QuestLine[order[2]][2]); //126
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) + 102]; SetQuestLine(QuestLine[order[2]][3]); //173
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) + 111]; SetQuestLine(QuestLine[order[2]][4]); //186
+QuestLine[order[3]][1] = order[3]*1000 + dirLine[(Direction*140) +  52]; SetQuestLine(QuestLine[order[3]][1]); //85
+QuestLine[order[3]][2] = order[3]*1000 + dirLine[(Direction*140) +  67]; SetQuestLine(QuestLine[order[3]][2]); //113
+QuestLine[order[3]][3] = order[3]*1000 + dirLine[(Direction*140) +  96]; SetQuestLine(QuestLine[order[3]][3]); //163
+QuestLine[order[3]][4] = order[3]*1000 + dirLine[(Direction*140) + 135]; SetQuestLine(QuestLine[order[3]][4]); //235
+QuestLine[order[4]][1] = order[4]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[4]][1]); //65
+QuestLine[order[4]][2] = order[4]*1000 + dirLine[(Direction*140) +  70]; SetQuestLine(QuestLine[order[4]][2]); //116
+QuestLine[order[4]][3] = order[4]*1000 + dirLine[(Direction*140) +  81]; SetQuestLine(QuestLine[order[4]][3]); //135
+QuestLine[order[4]][4] = order[4]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[4]][4]); //185
+
+//TELEPORT
+SetTelepoint(1,    8);
+SetTelepoint(2,    13);
+SetTelepoint(3,    24);
+SetTelepoint(4,    19);
+
+break;
+
+
+CASE 72://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 33
+C7____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,16), 5, 5); /*(int Cheight, int Ftx, int Ctx)*/delay(loadel);
+
+BASE____Floor64(1, 4, 2048, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 85, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 89, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 93, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(1, 4, 2048, 29, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 49, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(2, 4, 2048,  1, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 21, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 41, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 61, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(2, 4, 2048, 29, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 49, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, 2048,  5, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048,  9, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 13, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 17, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(3, 4, 2048, 25, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 49, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(4, 4, 2048, 37, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 57, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 77, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 97, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Floor64(4, 4, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 53, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 69, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+BASE____Ceiling64(1, 4, 64, 97, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(2, 4, 64, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(3, 4, 64,  1, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, 64, 17, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+//VISUALS
+VisualAt[0] = 5; VisualAt[1] = 8; VisualAt[2] = 12;
+             GoreSpawn(4, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(4, VisualAt[random(0,2)]);
+
+/*//TRAP
+RNG = random(0,5);if (RNG == 0)
+trap[1] = 28; trap[2] = 61; SetTrapAt = Trap[random(1, 2)];
+BASE____SetTrap(2, SetTrapAt);*/
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[1]][1]); //65
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  28]; SetQuestLine(QuestLine[order[1]][2]); //45
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  57]; SetQuestLine(QuestLine[order[1]][3]); //95
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 104]; SetQuestLine(QuestLine[order[1]][4]); //175
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[2]][1]); //65
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) +  81]; SetQuestLine(QuestLine[order[2]][2]); //135
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) + 104]; SetQuestLine(QuestLine[order[2]][3]); //175
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) + 120]; SetQuestLine(QuestLine[order[2]][4]); //205
+QuestLine[order[3]][1] = order[3]*1000 + dirLine[(Direction*140) +  46]; SetQuestLine(QuestLine[order[3]][1]); //75
+QuestLine[order[3]][2] = order[3]*1000 + dirLine[(Direction*140) +  57]; SetQuestLine(QuestLine[order[3]][2]); //95
+QuestLine[order[3]][3] = order[3]*1000 + dirLine[(Direction*140) +  75]; SetQuestLine(QuestLine[order[3]][3]); //125
+QuestLine[order[3]][4] = order[3]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[3]][4]); //185
+QuestLine[order[4]][1] = order[4]*1000 + dirLine[(Direction*140) +  47]; SetQuestLine(QuestLine[order[4]][1]); //76
+QuestLine[order[4]][2] = order[4]*1000 + dirLine[(Direction*140) +  69]; SetQuestLine(QuestLine[order[4]][2]); //115
+QuestLine[order[4]][3] = order[4]*1000 + dirLine[(Direction*140) +  92]; SetQuestLine(QuestLine[order[4]][3]); //155
+QuestLine[order[4]][4] = order[4]*1000 + dirLine[(Direction*140) + 104]; SetQuestLine(QuestLine[order[4]][4]); //175
+
+//TELEPORT
+SetTelepoint(1,    19);
+SetTelepoint(2,    25);
+SetTelepoint(3,    1);
+SetTelepoint(4,    11);
+
+break;
+
+CASE 73://///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEED 33
+C7____Edge_Stroke( BaseCeilingHeight + random(-1,1)*8*random(0,16), 5, 5); /*(int Cheight, int Ftx, int Ctx)*/delay(loadel);
+
+BASE____Floor64(1, 4, 2048, 65, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 45, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 25, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 29, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(1, 4, 2048, 37, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 21, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 53, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(2, 4, 2048, 81, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048,  1, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 21, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 41, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 33, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 53, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(3, 4, 2048, 73, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 45, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 53, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Floor64(4, 4, 2048, 57, 1);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+
+RNG = random(1,3);
+BASE____Ceiling64(1, 4, BaseCeilingHeight - (32*RNG), 85, 2);  /*(int ordernum, int numoftris, int value, int origin, int tx)*/delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight - (32*RNG), 5, 2);delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight - (32*RNG), 25, 2);delay(loadel);
+BASE____Ceiling64(4, 4, BaseCeilingHeight - (32*RNG), 49, 2);delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight - (32*RNG), 45, 2);delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight - (32*RNG), 49, 2);delay(loadel);
+BASE____Ceiling64(3, 4, BaseCeilingHeight - (32*RNG), 13, 2);delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight - (32*RNG), 41, 2);delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight - (32*RNG), 61, 2);delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight - (32*RNG), 73, 2);delay(loadel);
+BASE____Ceiling64(2, 4, BaseCeilingHeight - (32*RNG), 93, 2);delay(loadel);
+
+delay(5); BASE____Ceiling64(1, 4, 32, 1, 2); BASE____Ceiling64(1, 2, 32, 7, 2);  BASE____Ceiling64(1, 2, 32, 21, 2);delay(loadel);
+
+//VISUALS
+VisualAt[0] = 5; VisualAt[1] = 8; VisualAt[2] = 12;
+             GoreSpawn(4, VisualAt[random(0,2)]); RNG = random(0,1);
+if (RNG > 0) GoreSpawn(4, VisualAt[random(0,2)]);
+
+//TRAP
+RNG = random(0,16);if (RNG == 0)
+{trap[1] = 125; trap[2] = 86;
+BASE____SetTrap(1, Trap[random(1, 2)]);}
+
+//SETQUEST
+QuestLine[order[1]][1] = order[1]*1000 + dirLine[(Direction*140) +  5]; SetQuestLine(QuestLine[order[1]][1]); //5
+QuestLine[order[1]][2] = order[1]*1000 + dirLine[(Direction*140) +  17]; SetQuestLine(QuestLine[order[1]][2]); //25
+QuestLine[order[1]][3] = order[1]*1000 + dirLine[(Direction*140) +  75]; SetQuestLine(QuestLine[order[1]][3]); //125
+QuestLine[order[1]][4] = order[1]*1000 + dirLine[(Direction*140) + 139]; SetQuestLine(QuestLine[order[1]][4]); //245
+QuestLine[order[2]][1] = order[2]*1000 + dirLine[(Direction*140) +  5]; SetQuestLine(QuestLine[order[2]][1]); //5
+QuestLine[order[2]][2] = order[2]*1000 + dirLine[(Direction*140) +  63]; SetQuestLine(QuestLine[order[2]][2]); //105
+QuestLine[order[2]][3] = order[2]*1000 + dirLine[(Direction*140) + 75]; SetQuestLine(QuestLine[order[2]][3]); //125
+QuestLine[order[2]][4] = order[2]*1000 + dirLine[(Direction*140) + 110]; SetQuestLine(QuestLine[order[2]][4]); //185
+QuestLine[order[3]][1] = order[3]*1000 + dirLine[(Direction*140) +  11]; SetQuestLine(QuestLine[order[3]][1]); //15
+QuestLine[order[3]][2] = order[3]*1000 + dirLine[(Direction*140) +  75]; SetQuestLine(QuestLine[order[3]][2]); //125
+QuestLine[order[3]][3] = order[3]*1000 + dirLine[(Direction*140) +  92]; SetQuestLine(QuestLine[order[3]][3]); //155
+QuestLine[order[3]][4] = order[3]*1000 + dirLine[(Direction*140) + 115]; SetQuestLine(QuestLine[order[3]][4]); //195
+QuestLine[order[4]][1] = order[4]*1000 + dirLine[(Direction*140) +  28]; SetQuestLine(QuestLine[order[4]][1]); //45
+QuestLine[order[4]][2] = order[4]*1000 + dirLine[(Direction*140) +  40]; SetQuestLine(QuestLine[order[4]][2]); //65
+QuestLine[order[4]][3] = order[4]*1000 + dirLine[(Direction*140) +  75]; SetQuestLine(QuestLine[order[4]][3]); //125
+QuestLine[order[4]][4] = order[4]*1000 + dirLine[(Direction*140) + 125]; SetQuestLine(QuestLine[order[4]][4]); //215
+
+//TELEPORT
+SetTelepoint(1,    6);
+SetTelepoint(2,    19);
+SetTelepoint(3,    7);
+SetTelepoint(4,    7);
+
+break;
+
+}
+
+Seclude_Container();
+delay(loadel);
+ACS_NamedExecute("ClearPreparations", 0);
+}
+
+
+
+
+
+
+
+script "OutsideWalls" (void)
+{
+int window = 8;
+for(int a = 1600; a < 1940; a ++)
+ {
+ SetLineTexture(a, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[7]);
+ SetLineTexture(a, SIDE_BACK, TEXTURE_MIDDLE, WALLTX[7]);
+ SetLineTexture(a, SIDE_BACK, TEXTURE_TOP, WALLTX[7]);
+ SetLineTexture(a, SIDE_BACK, TEXTURE_TOP, WALLTX[7]);
+ }
+
+
+While(window > 0)
+   {
+   int ran = random(1600, 1739);
+   SetLineTexture(ran, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[6]);
+   SetLineTexture(ran, SIDE_BACK, TEXTURE_MIDDLE, WALLTX[6]);
+   window--;
+   }
+
+//sky
+SetLineTexture(22, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[8]);
+ChangeFloor(5, WALLTX[8]);
+ChangeCeiling(5, WALLTX[8]);
+
+SetLineTexture(24, SIDE_FRONT, TEXTURE_MIDDLE, WALLTX[2]);
+SetLineTexture(24, SIDE_BACK, TEXTURE_MIDDLE, WALLTX[2]);
+SetLineTexture(24, SIDE_FRONT, TEXTURE_TOP, WALLTX[2]);
+SetLineTexture(24, SIDE_FRONT, TEXTURE_BOTTOM, WALLTX[2]);
+SetLineTexture(25, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+SetLineTexture(25, SIDE_BACK, TEXTURE_MIDDLE, "-");
+SetLineTexture(25, SIDE_FRONT, TEXTURE_TOP, WALLTX[20]);
+SetLineTexture(25, SIDE_FRONT, TEXTURE_BOTTOM, WALLTX[2]);
+ChangeFloor(98, flatTX[3]);
+ChangeCeiling(98, flatTX[2]);
+Light_ChangeToValue(98, 0);
+SpawnSpotFacingForced(interpass, 27, 0);
+ACS_NamedExecute(strparam(s:"MDI_builder_for", i:mapstyle), 0);
+}
