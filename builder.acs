@@ -14,15 +14,15 @@
 ////////////////////////////////////////
 
 
-int loadbit = 0;
-bool BuildingDone = false;
-int ENTRYnum = 0;
+int loadbit;
+bool BuildingDone;
+int ENTRYnum;
 int mapstyle;
 bool mdilights = true;
 
 str flatTX[24] =
 {
-"F_SKY1", //[0] Nothing 
+"F_SKY1", //[0] Nothing
 "", //[1] Base Floor #1
 "", //[2] Base Floor #2
 "", //[3] Base Floor #3
@@ -382,9 +382,6 @@ int blocknum;
 
 
 
-
-script "check" (int xx, int yy)
-{print(i:block[yy][xx]);}
 
 
 Script "Builder" (void)
