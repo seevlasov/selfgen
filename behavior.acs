@@ -1,0 +1,2191 @@
+#include "ZCommon.acs"
+
+
+#import "redrum.acs"
+#import "classic.acs"
+#import "mdistuff.acs"
+#import "mdinwdi.acs"
+#import "mdibuild.acs"
+
+
+
+/*
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMdsosmMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNdssMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm/      -oNMMMMh++osyhmNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMy   /MMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMNmNMMMMMMMMMMMMMMMMMMMMMMMMy.         yMMMM:       `.:sdMMMMMMMMMMMMMMMMMMMMMMMMm.   sMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMh`   ``-+s/+mMMMMMMMMMMMd+/.           yMMMM+`           .sNMMMMMMMMMMMMMMMMMMMMM/    :shNMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN.           .dMMMMMMMMN+              `dMMMMMNds.          .oNMMMMMMMMMMMMMMMMMMh`      `dMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMo             .NMMMMMMd.               .NMMMMMMMy`            -dMMMMMMMMMMMMMMMMM-       /MMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm`              oMMMMMh`                .MMMMMMMm`               .+mMMMMMMMMMMMMMy        hMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM+               `mMMMs`                 :MMMMMMN:                  `yMMMMMMMMMMMN-       -NMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMd`                +MMo                   sMMMMMM+         .`          oMMMMMMMMMMs        sMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM+                 `h+                   .mMMMMMy`        oMm:          sMMMMMMMMm-       `NMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm`                                       yMMMMMm`        :MMMN:         `dMMMMMMMs        +MMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMo                                       -NMMMMM/        `dMMMMN/         :NMMMMMN.       `hMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN`                                       yMMMMMh         sMMMMMMN/         dMMMMMs        -NMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMo          ++                 `         -MMMMMN-        :NMMMMMMMm.        oMMMMN.        +MMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN.         .NN:               :`         yMMMMMo        `dMMMMMMMMo         /MMMMs         hMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMs          sMMd`            `s:         -NMMMMd`        oMMMMMMMMd`         :MMMm.        .mMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN-         -NMMM/           .d+          yMMMMM:        -NMMMMMMMM:          +MMM/         +MMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMy         .mMMMMm.         :Ns          -NMMMMy        `dMMMMMMMMs          `dMMm.         hMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM.         sMMMMMMNyo+:-.``sMh`          yMMMMm.        sMMMMMMMMN`          oMMMh`        `MMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMm`         NMMMMMMMMMMMMMNNMN.          -NMMMM+        /MMMMMMMMm:          /MMMM+         +MMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMy.         -MMMMMMMMMMMMMMMMMh           yMMMMh`       .NMMMMNdo:`          +MMMMM.        `hMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMm.          sMMMMMMMMMMMMMMMMM/          `dMMMM:        .so+:.`             oMMMMMh         :MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMs          .mMMMMMMMMMMMMMMMMd`          -MMMMh`                          `yMMMMMM+       `sNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMM/          oMMMMMMMMMMMMMMMMM+          `yMMMMd`                        .omMMMMMMN.       /MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMN.         -mMMMMMMMMMMMMMMMMM:          sMMMMMy                     `-odMMMMMMMMMN.       hMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMd`        `hMMMMMMMMMMMMMMMMMMNo`      :hMMMMMM:                 .:ohNMMMMMMMMMMMMMmh-- `-oMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMm+.    :ydmMMMMMMMMMMMMMMMMMMMMMMNNm: +MMMMMMMMh/------------/sdNMMMMMMMMMMMMMMMMMMMMMMmMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMdsymMMMMMMMMMMMMMMMMMMMMMMMMMMMMMd+NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+*/
+
+
+
+str MTPAIN[5];
+str mapresource;
+str techsuppB = "";
+str styleauthor = "";
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   REDEFINITONS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+//If you need help, ask Zeberpal!
+
+
+
+
+/*
+
+    Ok, pick your style's color, that will cover all the messages.
+    You can view the color codes in the https://zdoom.org/wiki/Print in the 'Colors' paragraph
+
+*/
+
+str FontColor[7] = { "c",
+
+"Q", //style 1 GREEN
+"i", //style 2 ORANGE
+"v",
+"r",
+"p",
+"e"};
+
+
+
+str AcciNoun[10] = {
+"Accident in ",
+"TROUBLE IN ",
+"DISASTER OF ",
+"HORROR OF ",
+"THE FEAR IN ",
+"IN FRIGHT OF ",
+"TERROR IN ",
+"DREADS OF ",
+"MASSACRE IN ",
+"BLOODBATH IN "
+};
+
+str TitleAdject[15] = {
+"THE ",
+"NORTHERN ",
+"WESTERN ",
+"SOUTHERN ",
+"EASTERN ",
+"TERRIFYING ",
+"GHASTLY ",
+"HAUNTED ",
+"CURSED ",
+"POSSESSED ",
+"GHOSTLY ",
+"BLOODTHIRSTY ",
+"FATAL ",
+"DEADLY ",
+"FALLEN "
+};
+
+str TitleNumber[3] = {
+"",
+"II ",
+"III ",
+};
+
+str ThemeNoun[73] = {
+"",
+
+
+
+//SPACE nouns
+
+//Here you define you style's nouns that may show in the movie title.
+
+// the first 8 nouns are places where the action is taken on
+"Far Away ",
+"Outer Space ",
+"Space ",
+"Interstellar ",
+"Station ",
+"Signal ",
+"Post ",
+"Base ",
+//the next 4 nouns describe the scenario villain
+"Creature ",
+"Monster ",
+"Beast ",
+"Alien ",
+
+
+
+
+//EGYPT nouns
+"Caverns ",
+"Shrine ",
+"Tomb ",
+"Treasure ",
+"Pyramid ",
+"Depths ",
+"Kinam-Ra ",
+"Sepulcher ",
+"Mummy ",
+"Dead Man ",
+"Pharaoh ",
+"Tyrant ",
+
+
+//THING
+"Cold ",
+"Snow ",
+"Blizzard ",
+"Snowstorm ",
+"Polar Station ",
+"McMurdo ",
+"Amundsen-Scott ",
+"Arctic Base ",
+"Creature ",
+"Imposter ",
+"Thing ",
+"Alien ",
+
+//TORN
+"City ",
+"Torn City ",
+"Torn City ",
+"Torn ",
+"Outskirts ",
+"Projects ",
+"Ghetto ",
+"Judgement Day ",
+"T9000 ",
+"Humanoid ",
+"Tornminator ",
+"Tornminator ",
+
+
+//these are just the styles I had in mind, nvm
+"Lost ",
+"Nowhere ",
+"Night ",
+"Ritual ",
+"Mansion ",
+"House ",
+"Sanitarium ",
+"Asylum ",
+"Spirit ",
+"Scream ",
+"Ghost ",
+"Lina ",
+
+"Arrakis ",
+"Dune ",
+"Desert Planet ",
+"Cave ",
+"Desert Cave  ",
+"Shelter ",
+"Hideout ",
+"Sietch ",
+"DuneVillain ",
+"DuneVillain ",
+"DuneVillain ",
+"DuneVillain ",
+/*
+"Breath ",
+"Ocean ",
+"Lake ",
+"Sea ",
+"Andrea Doria ",
+"Yacht ",
+"Ship ",
+"Deep ",
+"Jaws ",
+"Shark ",
+"Maneater ",
+"Fin ",
+*/
+
+};
+
+
+
+//ACCIDENT IN            HAUNTED                             BASE
+//ACCIDENT IN            HAUNTED                             BASE
+//ACCIDENT IN                             'THE'              BASE
+//                       'THE'            HAUNTED            BASE
+//                                        'THE'              BASE
+
+
+str VictimCharAdj[10] = {
+"Confident ",
+"Traitorous ",
+"Depressed ",
+"Horny ",
+"Nasty ",
+"Insecure ",
+"Brave ",
+"Cute ",
+"Muddle-headed ",
+"Clumsy "
+};
+
+str VictimCharNoun[10] = {
+"Teenager",
+"Beefcake",
+"Simp",
+"Coward",
+"Wimp",
+"Lady",
+"Mary Sue",
+"Nymphet",
+"Milf",
+"Teen"
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////   INTRO first phase
+///////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+SCRIPT "REDEFINITION" OPEN
+{
+
+MDITELEPORTA = 22900;
+int outerChei =  512;  //Height of the ceiling in the outside of the map
+int outerFhei = -512;  //Height of the Floor in the outside of the map
+wdimdiadd[17] = 15;
+mdiprologue = true;
+{
+if (getcvar("mdispecial4") != 0)   mdigame[7] = (getcvar("mdispecial4") + 2)*100;
+else mdigame[7] = random(3,8)*100; //DEFINES MAP STYLE AND MONSTER;
+}
+mapstyle = (mdigame[7]/100)-2;
+
+
+mdigame[17] = 20;
+mdigame[18] = 30000;
+mdigame[19] = 21;
+
+endcam[1] = 23121;
+endcam[2] = 23121;
+endcam[3] = 23121;
+endcam[4] = 23101;
+
+
+SetCVAR("MDIchasetime", 12);
+chasedist = 768;
+
+
+
+
+
+
+/*Now, this is important, you must pick your style's index.
+To pick it right, scroll down and see how many 'case' tabs there is. The next number is your 'case'
+Case will define all your wanted textures, music, monster, etc.
+
+
+So I would just copy/paste SPACE's case, change it's index to the next number, and that's it.
+Also! dont forget to plus the second 'random's number in the mdigame[7] array above, so you style would be included.
+
+*/
+
+switch(mapstyle)
+{
+
+
+
+
+
+case 1: //SPACE
+styleauthor = "Aliens"; // your author name
+
+BaseCeilingHeight = 192; //the average height of the ceiling
+BaseFloorHeight = 0; //basic floor height, better leave it at 0
+
+flatTX[1] = "YZLOST07"; //Primary floor texture
+flatTX[2] = "YZLOST04"; //secondary floor texture
+flatTX[3] = "YZTX1101"; //secondary floor texture
+flatTX[4] = "YZTX464";  //secondary floor texture
+flatTX[5] = "YZTX3279";  //secondary floor texture
+
+flatTX[11] = "YZTX1269"; //light texture;
+flatTX[12] = "YZTX735";  //another light texture
+flatTX[13] = "YZTX3265"; //rare light texture
+flatTX[16] = "FAN1";     //1st trap floor texture
+flatTX[17] = "F_SKY1";   //2nd trap floor texture
+
+
+WALLTX[1] = "YZTX206"; //the very main texture
+WALLTX[2] = "YZTX208"; //secondary main texture
+WALLTX[3] = "YZTX212"; //rare texture
+WALLTX[4] = "YZTX214"; //rare texture 2
+WALLTX[5] = "YZTX214"; //rare texture 2
+WALLTX[6] = "YZTXSTK1";  //window texture
+WALLTX[7] = "YZTX159"; //global border wall texture
+wallTX[8] = "MDISKY1"; // sky texture: use a swedish layout skybox texture
+WALLTX[20] = "YZTX73"; //entrance Top texture
+
+interpass = "mdiarc1"; //a 3d model actor of the interpass between the areas
+bugwall = "mdiwall1"; //a fake 3dmodel wall used to cover the 3.0 bug
+
+
+//these are various ambient sounds played around the map
+AmbienceSFX[1] = "SND_GUUL";
+AmbienceSFX[2] = "SND_GUUL";
+AmbienceSFX[3] = "SND_ALARM";
+AmbienceSFX[4] = "SND_CPUloop1";
+AmbienceSFX[5] = "SND_CPUloop2";
+AmbienceSFX[6] = "SND_CPUloop3";
+AmbienceSFX[7] = "SND_Machineloop";
+AmbienceSFX[8] = "SND_DevilPrayer";
+
+//this is the various music played when Victim is being chased
+SetCVARstring("MDIchasemusic", "MDICHZ");
+
+//Mutilator
+MutilatorType[0] = "Mutilator3";  //[0] is Mutilator (weapon) for Murderer. Primary array.
+MutilatorType[2] = "SND_ALIENTNT"; //The mutilator's taunt type
+MutilatorType[3] = "SND_ALIENSTEP"; // sound that is coming from Mutilator while he is walking
+MutilatorType[4] = "Alien"; //State of Stunyou actor, used when 5:00 and you turn to Mutilator behind you
+SetCvarString("MDIroundmusic", strparam(s:"MDIAMB", i:random(3,8))); //Music theme for a map
+
+
+//Sound effects of the pain that Mutilator takes.
+MTPAIN[0] = "ALIEPAI1"; //100hp - 75hp
+MTPAIN[1] = "ALIEPAI2"; //75hp - 50hp
+MTPAIN[2] = "ALIEPAI3"; //50hp - 25hp
+MTPAIN[3] = "ALIEPAI4"; //25hp - 0hp
+MTPAIN[4] = "ALIEDTH"; //mutilator's death sound
+
+//Quest done sound.
+MPassedSFX[1] = "SDCLOTH";
+MPassedSFX[2] = "SDCLOTH";
+MPassedSFX[3] = "HOSPIVOICES";
+MPassedSFX[4] = "SDCLOTH";
+MPassedSFX[5] = "SDCLOTH";
+MPassedSFX[6] = "SDCLOTH";
+MPassedSFX[7] = "SOULSARE";
+MPassedSFX[8] = "SDCLOTH";
+MPassedSFX[9] = "SDHEROWW";
+
+//Quest Information;  'a' is an image quest.
+MissionINFO[0] = "???";  //Secret Ending Quest/Easter Egg
+MissionINFO[1] = "Search this \ckarea \ccfor your lieutenant,\nand talk to him as soon as possible!\nHe knows a way outta here!";
+MissionINFO[2] = "Lieutenant is missing! \n\nHis last transmission signal came from this \cksector";
+MissionINFO[3] = "His screams are heard from \cksomewhere\cc!";
+MissionINFO[4] = "Lieutenant's inventory is left on the floor.\nThere was an MW sensor among them.\nUse it to trace \ckother items";
+MissionINFO[5] = "Thanks to magnetic wave sensor, \n\nyou've found his Keycard to the secret \ckfloor hatch";
+MissionINFO[6] = "You've collected a data from a hatch.\nIt says how to launch the emergency escape capsule.\nStep on the \ckpuller";
+MissionINFO[7] = "There is another puller \cksomewhere";
+MissionINFO[8] = "Turn on the \ckemergency generator\cc for emergency exit!";
+MissionINFO[9] = "Now locate the \cksecret path \ccto the capsule itself";
+MissionINFO[10] = "You've found it!\nIt's gonna be over soon\n\nBetter stay quiet untill then";
+
+
+//MAP RESOURCES IF TAKEN FROM SOMEWHERE
+mapresource = StrParam(s:"\c", s:FontColor[mapstyle], s:"Lex Safonov\n\c", s:FontColor[mapstyle], s:"Kontra_Kommando\n\c", s:FontColor[mapstyle], s:"Acclaim Entertainment" );
+
+
+//ADDITIONAL HELP FROM
+techsuppB = "";
+
+
+
+break;
+
+
+
+
+
+
+
+
+case 2: //EGYPT
+styleauthor = "Zeberpal";
+
+BaseCeilingHeight = 320;
+BaseFloorHeight = 0;
+
+flatTX[1] = "EFLOOR16";
+flatTX[2] = "EFLOOR12";
+flatTX[3] = "CONCEIL";
+flatTX[4] = "TMAYWL16";
+flatTX[5] = "EWALL14";
+
+flatTX[11] = "BSKULL10";
+flatTX[12] = "BKEY01";
+flatTX[13] = "BSW02A";
+flatTX[16] = "ASLIM01";
+flatTX[17] = "BLACKTX";
+
+
+WALLTX[1] = "EWALL14";
+WALLTX[2] = "ETEX13";
+WALLTX[3] = "BSKULP03";
+WALLTX[4] = "BSKULP02";
+WALLTX[5] = "BSKULP02";
+WALLTX[6] = "GATMETLE";
+WALLTX[7] = "ETEX20";
+wallTX[8] = "MDISKY2";
+WALLTX[20] = "EG_WAL09"; //entrance Top texture
+
+interpass = "mdiarc2";
+bugwall = "mdiwall2";
+
+AmbienceSFX[1] = "SND_GUUL";
+AmbienceSFX[2] = "SND_GUUL";
+AmbienceSFX[3] = "SND_CAVERNS";
+AmbienceSFX[4] = "SND_Moskitos";
+AmbienceSFX[5] = "SND_SHHHOTEL";
+AmbienceSFX[6] = "SND_CAVERNS";
+AmbienceSFX[7] = "SND_SHHHOTEL";
+AmbienceSFX[8] = "SND_DevilPrayer";
+
+//this is the various music played when Victim is being chased
+SetCVARstring("MDIchasemusic", "MDICHZ");
+
+//Mutilator
+MutilatorType[0] = "Mutilator4";  //[0] is Mutilator (weapon) for Murderer. Primary array.
+MutilatorType[2] = "SND_ManiacLaugh"; //The mutilator's taunt type
+MutilatorType[3] = "SND_ALIENSTEP"; // sound that is coming from Mutilator while he is walking
+MutilatorType[4] = "Mummy"; //State of Stunyou actor, used when 5:00 and you turn to Mutilator behind you
+SetCvarString("MDIroundmusic", strparam(s:"MDIAMB", i:random(3,8))); //Map Music
+//SFX
+MTPAIN[0] = "MTPain1";
+MTPAIN[1] = "MTPain7";
+MTPAIN[2] = "MTPain5";
+MTPAIN[3] = "MTPain2";
+MTPAIN[4] = "MUTIDTH";
+
+//Quest done sound
+MPassedSFX[1] = "SDCLOTH";
+MPassedSFX[2] = "SDCLOTH";
+MPassedSFX[3] = "SDCLOTH";
+MPassedSFX[4] = "SDCLOTH";
+MPassedSFX[5] = "SDCLOTH";
+MPassedSFX[6] = "SDCLOTH";
+MPassedSFX[7] = "SDCLOTH";
+MPassedSFX[8] = "YSDCLOTH";
+MPassedSFX[9] = "SDHEROWW";
+
+//Quest Information;  'a' is an image quest.
+MissionINFO[0] = "???";  //Secret Ending Quest/Easter Egg
+MissionINFO[1] = "Mummy was ressurected! \n\nBring it back to eternal sleep! Find it's \cktrace";
+MissionINFO[2] = "You'll have to step on 6 secret plates. \n\nStart off from \ckhere";
+MissionINFO[3] = "Second trigger plate is \ckhere";
+MissionINFO[4] = "Another plate is \ckhere";
+MissionINFO[5] = "Fourth plate is \ckhere";
+MissionINFO[6] = "Fifth trigger plate is \ckhere";
+MissionINFO[7] = "Not so much left! \n\nAnother plate is \ckhere";
+MissionINFO[8] = "Seventh trigger plate is \ckhere";
+MissionINFO[9] = "Now locate the \cksecret path \ccto escape the tomb";
+MissionINFO[10] = "You've found it!\nIt's gonna be over soon\n\nBetter stay quiet untill then";
+
+//Strings
+
+
+//MAP RESOURCES IF TAKEN FROM SOMEWHERE
+mapresource = StrParam(s:"\c", s:FontColor[mapstyle], s:"DUNKELSCHWAMM\n\c", s:FontColor[mapstyle], s:"Capt.J3\n\c", s:FontColor[mapstyle], s:"BMG Entertainment" );
+
+//ADDITIONAL HELP FROM
+techsuppB = "";
+
+break;
+
+
+
+case 3: //THING
+styleauthor = "S K U L A T A G I"; // your author name
+
+BaseCeilingHeight = 192; //the average height of the ceiling
+BaseFloorHeight = 0; //basic floor height, better leave it at 0
+
+flatTX[1] = "MDI3SNO1"; //Primary floor texture
+flatTX[2] = "MDI3SNO2"; //secondary floor texture
+flatTX[3] = "MDI3SNO1"; //secondary floor texture
+flatTX[4] = "ICEF1";  //secondary floor texture
+flatTX[5] = "MDI3SNO1";  //secondary floor texture
+
+flatTX[11] = "YZTX1269"; //light texture;
+flatTX[12] = "YZTX735";  //another light texture
+flatTX[13] = "YZTX3265"; //rare light texture
+flatTX[16] = "FAN1";     //1st trap floor texture
+flatTX[17] = "F_SKY1";   //2nd trap floor texture
+
+
+WALLTX[1] = "SNEG01"; //the very main texture
+WALLTX[2] = "XCTX0072"; //secondary main texture
+WALLTX[3] = "SNEG03"; //rare texture
+WALLTX[4] = "SNEG21"; //rare texture 2
+WALLTX[5] = "BWOOD02"; //rare texture 2
+WALLTX[6] = "SNEG04";  //window texture
+WALLTX[7] = "BWOOD04"; //global border wall texture
+wallTX[8] = "MDISKY3"; // sky texture: use a swedish layout skybox texture
+WALLTX[20] = "SNEG19"; //entrance Top texture
+
+interpass = "mdiarc3"; //a 3d model actor of the interpass between the areas
+bugwall = "mdiwall3"; //a fake 3dmodel wall used to cover the 3.0 bug
+
+
+//these are various ambient sounds played around the map
+AmbienceSFX[1] = "SND_GUUL";
+AmbienceSFX[2] = "SND_SHHHOTEL";
+AmbienceSFX[3] = "SND_Ambient_night";
+AmbienceSFX[4] = "SND_strongwind";
+AmbienceSFX[5] = "SND_Ambient_night";
+AmbienceSFX[6] = "SND_strongwind";
+AmbienceSFX[7] = "SND_SHHHOTEL";
+AmbienceSFX[8] = "SND_strongwind";
+
+//this is the various music played when Victim is being chased
+SetCVARstring("MDIchasemusic", "MDICHZ");
+
+
+//Mutilator
+MutilatorType[0] = "Mutilator5";  //[0] is Mutilator (weapon) for Murderer. Primary array.
+MutilatorType[2] = "SND_ManiacLaugh"; //The mutilator's taunt type
+MutilatorType[3] = "SND_ALIENSTEP"; // sound that is coming from Mutilator while he is walking
+MutilatorType[4] = "Alien"; //State of Stunyou actor, used when 5:00 and you turn to Mutilator behind you
+SetCvarString("MDIroundmusic", strparam(s:"MDIAMB", i:random(3,8))); //Music theme for a map
+
+
+//Sound effects of the pain that Mutilator takes.
+MTPAIN[0] = "MTPain1";
+MTPAIN[1] = "MTPain7";
+MTPAIN[2] = "MTPain5";
+MTPAIN[3] = "MTPain2";
+MTPAIN[4] = "MUTIDTH";
+
+//Quest done sound.
+MPassedSFX[1] = "SDCLOTH";
+MPassedSFX[2] = "SDCLOTH";
+MPassedSFX[3] = "SDCLOTH";
+MPassedSFX[4] = "SDCLOTH";
+MPassedSFX[5] = "SDCLOTH";
+MPassedSFX[6] = "SDCLOTH";
+MPassedSFX[7] = "SOULSARE";
+MPassedSFX[8] = "SDCLOTH";
+MPassedSFX[9] = "SDHEROWW";
+
+//Quest Information;  'a' is an image quest.
+MissionINFO[0] = "???";  //Secret Ending Quest/Easter Egg
+MissionINFO[1] = "THe Thing is on the loose!\n\nYou've lured it to abandonned warehouse\n\nThere used to be a dynamite here \cksomewhere!";
+MissionINFO[2] = "Found some dynamite!\n\nGotta place it in a few \ckspots \ccto blow this thing up for sure";
+MissionINFO[3] = "Another good \ckspot \ccis here.";
+MissionINFO[4] = "Gotta place some dynamite \ckhere \cctoo.";
+MissionINFO[5] = "There is the last \ckspot \cchere.";
+MissionINFO[6] = "If the plan fails, you cannot\n\n risk a rescure team coming down here.\n\nFind and destroy \ckthe transmitter!";
+MissionINFO[7] = "Find a \ckfuse";
+MissionINFO[8] = "Lit the fuse up in this \ckspot, \n\n\cc to blow the dynamite";
+MissionINFO[9] = "Find a \ckplace\n\\ncc where you can evade\n\nthe blow!";
+MissionINFO[10] = "You've found it!\nIt's gonna be over soon\n\nBetter stay quiet untill it blows up!";
+
+
+//MAP RESOURCES IF TAKEN FROM SOMEWHERE
+mapresource = StrParam(s:"\c", s:FontColor[mapstyle], s:"Peanut\n\c", s:FontColor[mapstyle], s:"Azabu");
+
+
+//ADDITIONAL HELP FROM
+techsuppB = "";
+
+break;
+
+
+case 4: //RETORN
+styleauthor = "Shaved Sheep"; // your author name
+
+BaseCeilingHeight = 192; //the average height of the ceiling
+BaseFloorHeight = 0; //basic floor height, better leave it at 0
+
+flatTX[1] = "VOINI25"; //Primary floor texture
+flatTX[2] = "BOW_SIDE"; //secondary floor texture
+flatTX[3] = "KPTX0061"; //secondary floor texture
+flatTX[4] = "XCTX0085";  //secondary floor texture
+flatTX[5] = "VOINI25";  //secondary floor texture
+
+flatTX[11] = "YZTX413A"; //light texture;
+flatTX[12] = "YZTX735";  //another light texture
+flatTX[13] = "YZTX3265"; //rare light texture
+flatTX[16] = "ASLIM01";     //1st trap floor texture
+flatTX[17] = "ASLIM01";   //2nd trap floor texture
+
+
+WALLTX[1] = "CJ_DIRTY"; //the very main texture
+WALLTX[2] = "XCTX0113"; //secondary main texture
+WALLTX[3] = "CHU_BIGW"; //rare texture
+WALLTX[4] = "CHU_BIGW"; //rare texture 2
+WALLTX[5] = "CHU_BIGW"; //rare texture 2
+WALLTX[6] = "XCTX0060";  //window texture
+WALLTX[7] = "XCTX0127"; //global border wall texture
+wallTX[8] = "MDISKY4"; // sky texture: use a swedish layout skybox texture
+WALLTX[20] = "XCTX0092"; //entrance Top texture
+
+interpass = "mdiarc4"; //a 3d model actor of the interpass between the areas
+bugwall = "mdiwall4"; //a fake 3dmodel wall used to cover the 3.0 bug
+
+
+//these are various ambient sounds played around the map
+AmbienceSFX[1] = "MUS_CLUB";
+AmbienceSFX[2] = "SND_Ambient_night";
+AmbienceSFX[3] = "SND_SHHHOTEL";
+AmbienceSFX[4] = "MUS_CLUB";
+AmbienceSFX[5] = "SND_Ambient_night";
+AmbienceSFX[6] = "SND_SHHHOTEL";
+AmbienceSFX[7] = "SND_Ambient_night";
+AmbienceSFX[8] = "SND_SHHHOTEL";
+
+//this is the various music played when Victim is being chased
+SetCVARstring("MDIchasemusic", "MDICHZ");
+
+
+//Mutilator
+MutilatorType[0] = "Mutilator6";  //[0] is Mutilator (weapon) for Murderer. Primary array.
+MutilatorType[2] = "SND_ManiacLaugh"; //The mutilator's taunt type
+MutilatorType[3] = "SND_ALIENSTEP"; // sound that is coming from Mutilator while he is walking
+MutilatorType[4] = "T800"; //State of Stunyou actor, used when 5:00 and you turn to Mutilator behind you
+SetCvarString("MDIroundmusic", strparam(s:"MDIAMB", i:random(3,8))); //Music theme for a map
+
+
+//Sound effects of the pain that Mutilator takes.
+MTPAIN[0] = "MTPain1";
+MTPAIN[1] = "MTPain7";
+MTPAIN[2] = "MTPain5";
+MTPAIN[3] = "MTPain2";
+MTPAIN[4] = "MUTIDTH";
+
+//Quest done sound.
+MPassedSFX[1] = "SDCLOTH";
+MPassedSFX[2] = "SDCLOTH";
+MPassedSFX[3] = "SDCLOTH";
+MPassedSFX[4] = "SDCLOTH";
+MPassedSFX[5] = "SDCLOTH";
+MPassedSFX[6] = "SDCLOTH";
+MPassedSFX[7] = "SOULSARE";
+MPassedSFX[8] = "SDCLOTH";
+MPassedSFX[9] = "SDHEROWW";
+
+//Quest Information;  'a' is an image quest.
+MissionINFO[0] = "???";  //Secret Ending Quest/Easter Egg
+MissionINFO[1] = "A Tornminator has traveled from the future\nto destroy mankind! YOu've also traveled to this place to stop him! \n Find \cksomething \ccthat could help you";
+MissionINFO[2] = "You've found some kind of a key.\n\nIt probably fits \cksomething \ccnearby.";
+MissionINFO[3] = "There was a secret safe here.\nUnlocking it you've received papers indicating, \nthere was a Skynet office \ckhere";
+MissionINFO[4] = "It seem Tornminator has came to prevent you\n\n from destroying the remains from the \ckresearches";
+MissionINFO[5] = "You've collected cyborg cells, \n\n Bring them to \ckthis place to destroy!";
+MissionINFO[6] = "You did it!\nTornminator is still a threat to mankind\nYou need the \ckvoltage sources \cc to use against him.";
+MissionINFO[7] = "Found the first voltage source!\n\n Find the \cksecond one";
+MissionINFO[8] = "Head to the \ckswitch";
+MissionINFO[9] = "Protector is on! Turn it off in 'ckhere!";
+MissionINFO[10] = "You've found it!\nIt's gonna be over soon\n\nBetter stay quiet untill then";
+
+
+//MAP RESOURCES IF TAKEN FROM SOMEWHERE
+mapresource = StrParam(s:"\c", s:FontColor[mapstyle], s:"Kontra_Kommando\n\c", s:FontColor[mapstyle], s:"Rockstar Games\n\c", s:FontColor[mapstyle], s:"Xatrix Entertainment" );
+
+
+//ADDITIONAL HELP FROM
+techsuppB = "";
+
+break;
+
+
+
+
+case 5: //LINA
+styleauthor = "Zeberpal"; // your author name
+
+BaseCeilingHeight = 180; //the average height of the ceiling
+BaseFloorHeight = 0; //basic floor height, better leave it at 0
+
+flatTX[1] = "ATEP04"; //Primary floor texture
+flatTX[2] = "XCTX0072"; //secondary floor texture
+flatTX[3] = "XCTX0072"; //secondary floor texture
+flatTX[4] = "XCTX0072";  //secondary floor texture
+flatTX[5] = "HL2TX04";  //secondary floor texture
+
+flatTX[11] = "ADEL_N04"; //light texture;
+flatTX[12] = "BLITE22";  //another light texture
+flatTX[13] = "ADEL_N04"; //rare light texture
+flatTX[16] = "ASLIM01";     //1st trap floor texture
+flatTX[17] = "ASLIM01";   //2nd trap floor texture
+
+
+WALLTX[1] = "XCTX0013"; //the very main texture
+WALLTX[2] = "MOEZ18"; //secondary main texture
+WALLTX[3] = "XCTX0015"; //rare texture
+WALLTX[4] = "XCTX0014"; //rare texture 2
+WALLTX[5] = "XCTX0011"; //rare texture 2
+WALLTX[6] = "GLSSW005";  //window texture
+WALLTX[7] = "XCTX0010"; //global border wall texture
+wallTX[8] = "MDISKY5"; // sky texture: use a swedish layout skybox texture
+WALLTX[20] = "HL2TX04"; //entrance Top texture
+
+interpass = "mdiarc5"; //a 3d model actor of the interpass between the areas
+bugwall = "mdiwall5"; //a fake 3dmodel wall used to cover the 3.0 bug
+
+
+//these are various ambient sounds played around the map
+AmbienceSFX[1] = "SND_SND_SHHHOTEL";
+AmbienceSFX[2] = "SND_Ambient_night";
+AmbienceSFX[3] = "SND_SHHHOTEL";
+AmbienceSFX[4] = "SND_SHHHOTEL";
+AmbienceSFX[5] = "SND_Ambient_night";
+AmbienceSFX[6] = "SND_SHHHOTEL";
+AmbienceSFX[7] = "SND_Ambient_night";
+AmbienceSFX[8] = "SND_SHHHOTEL";
+
+//this is the various music played when Victim is being chased
+SetCVARstring("MDIchasemusic", "MDICHZ");
+
+
+//Mutilator
+MutilatorType[0] = "Mutilator7";  //[0] is Mutilator (weapon) for Murderer. Primary array.
+MutilatorType[2] = "LINATNT"; //The mutilator's taunt type
+MutilatorType[3] = "SNDLIN"; // sound that is coming from Mutilator while he is walking
+MutilatorType[4] = "LINA"; //State of Stunyou actor, used when 5:00 and you turn to Mutilator behind you
+SetCvarString("MDIroundmusic", strparam(s:"MDIAMB", i:random(3,8))); //Music theme for a map
+
+
+//Sound effects of the pain that Mutilator takes.
+MTPAIN[0] = "SNDLIN";
+MTPAIN[1] = "SNDLIN";
+MTPAIN[2] = "SNDLIN";
+MTPAIN[3] = "SNDLIN";
+MTPAIN[4] = "SNDLIN";
+
+//Quest done sound.
+MPassedSFX[1] = "SDCLOTH";
+MPassedSFX[2] = "SDCLOTH";
+MPassedSFX[3] = "SDCLOTH";
+MPassedSFX[4] = "SDCLOTH";
+MPassedSFX[5] = "SDCLOTH";
+MPassedSFX[6] = "SDCLOTH";
+MPassedSFX[7] = "SOULSARE";
+MPassedSFX[8] = "SDCLOTH";
+MPassedSFX[9] = "SDHEROWW";
+
+//Quest Information;  'a' is an image quest.
+MissionINFO[0] = "???";  //Secret Ending Quest/Easter Egg
+MissionINFO[1] = "Lina has sucked you into her \ntwisted world of nightmare. \nExit the way you've entered from \ckhere";
+MissionINFO[2] = "The exit was walled up!\nThere was another exit by the \ckstairs.";
+MissionINFO[3] = "It's gone as well! \nOn your way here, there were some \ckpapers.\n\ccMaybe it could be a hint.";
+MissionINFO[4] = "Looks like they were torn from a diary.\n\nLook for the \ckdiary!";
+MissionINFO[5] = "It is said in the diary that Lina was hanged by her friends\nShe wants a revenge on them\nbut they're hiding \cksomewhere.\n\ccHelp here, and she'll set you free.";
+MissionINFO[6] = "Looks like one of them was \ckhere!\n\ccMark it!";
+MissionINFO[7] = "Another friend is hiding in this \ckarea.";
+MissionINFO[8] = "She did her revenge! BUt the she said,\nthat she'll set you free she meant your death!\nHide for some time in \ckhere!";
+MissionINFO[9] = "She've found your whereabouts, \nmove to another \ckarea!";
+MissionINFO[10] = "It's gonna be over soon\n\nBetter stay quiet untill then";
+
+
+//MAP RESOURCES IF TAKEN FROM SOMEWHERE
+mapresource = StrParam(s:"\c", s:FontColor[mapstyle], s:"Sonya from Zdaemon\n\c", s:FontColor[mapstyle], s:"R*Games\n\c", s:FontColor[mapstyle], s:"Hideo Nakata");
+
+
+//ADDITIONAL HELP FROM
+techsuppB = "";
+
+break;
+
+
+
+
+
+
+case 6: //DUNE by DEA
+
+int DEApick = random(0,1);
+
+if (DEApick == 0) //SARDUKAR
+{
+
+styleauthor = "\ciDEA";
+BaseCeilingHeight = 180; //the average height of the ceiling
+BaseFloorHeight = 0; //basic floor height, better leave it at 0
+
+
+
+ThemeNoun[12*mapstyle - 0] = "Sardaukar ";
+ThemeNoun[12*mapstyle - 1] = "Emperor's soldier ";
+ThemeNoun[12*mapstyle - 2] = "Elite soldier ";
+ThemeNoun[12*mapstyle - 3] = "Soldier from Salusa Secundus ";
+
+for(int dea = 0; dea < 10; dea++)  VictimCharAdj[dea] = "";
+
+VictimCharNoun[0] = "Fremen";
+VictimCharNoun[1] = "Weak Fremen";
+VictimCharNoun[2] = "Young Fremen";
+VictimCharNoun[3] = "Desert Villager";
+VictimCharNoun[4] = "Dune Villager";
+VictimCharNoun[5] = "Dune Warrior";
+VictimCharNoun[6] = "Survived Atreides";
+VictimCharNoun[7] = "Atreides Troop";
+VictimCharNoun[8] = "Atreides Soldier";
+VictimCharNoun[9] = "Soldier from Caladan";
+VictimCharNoun[10] = "Desert Villager";
+VictimCharNoun[11] = "Fremen";
+
+
+flatTX[1] = "SAND1"; //Primary floor texture
+flatTX[2] = "SAND1"; //secondary floor texture
+flatTX[3] = "ROCK7"; //secondary flat texture
+flatTX[4] = "ROCK7A";  //secondary flat texture
+flatTX[5] = "ROCK7B";  //secondary flat texture
+
+flatTX[11] = "YZTX735"; //light texture;
+flatTX[12] = "YZTX735";  //another light texture
+flatTX[13] = "YZTX735"; //rare light texture
+flatTX[16] = "ROCK8B";     //1st trap floor texture
+flatTX[17] = "ROCK8";   //2nd trap floor texture
+
+WALLTX[1] = "ROCK8"; //the very main texture
+WALLTX[2] = "ROCK8A"; //secondary main texture
+WALLTX[3] = "ROCK8B"; //rare texture
+WALLTX[4] = "ROCK8C"; //rare texture 2
+WALLTX[5] = "ROCK8A"; //rare texture 2
+WALLTX[6] = "ROCK8B";  //window texture
+WALLTX[7] = "ROCK8C"; //global border wall texture
+wallTX[8] = "MDISKY6"; // sky texture: use a swedish layout skybox texture
+WALLTX[20] = "ROCK8"; //entrance Top texture
+
+interpass = "mdiarc6A"; //a 3d model actor of the interpass between the areas
+bugwall = "mdiwall6A"; //a fake 3dmodel wall used to cover the 3.0 bug
+
+//these are various ambient sounds played around the map
+AmbienceSFX[1] = "SDCAVERN";
+AmbienceSFX[2] = "SDCAVERN";
+AmbienceSFX[3] = "SDCAVERN";
+AmbienceSFX[4] = "SDCAVERN";
+AmbienceSFX[5] = "SND_GUUL";
+AmbienceSFX[6] = "SND_GUUL";
+AmbienceSFX[7] = "SND_GUUL";
+AmbienceSFX[8] = "SND_GUUL";
+
+//this is the various music played when Victim is being chased
+SetCVARstring("MDIchasemusic", "MDICHZ");
+
+//Mutilator
+MutilatorType[0] = "Mutilator99";  //[0] is Mutilator (weapon) for Murderer. Primary array.
+MutilatorType[2] = "SRKTNT"; //The mutilator's taunt type, sound
+MutilatorType[3] = "SND_ALIENSTEP"; // sound that is coming from Mutilator while he is walking //no
+MutilatorType[4] = "Sardaukar"; //State of Stunyou actor, used when 5:00 and you turn to Mutilator behind you
+SetCvarString("MDIroundmusic", strparam(s:"MDIAMB", i:random(3,8))); //Music theme for a map
+
+//Sound effects of the pain that Mutilator takes.
+MTPAIN[0] = "MUTIPIN1"; //100hp - 75hp
+MTPAIN[1] = "MUTIPIN2"; //75hp - 50hp
+MTPAIN[2] = "MUTIPIN3"; //50hp - 25hp
+MTPAIN[3] = "MTPAIN2"; //25hp - 0hp
+MTPAIN[4] = "MUTIDTH"; //mutilator's death sound
+
+//Quest done sound.
+MPassedSFX[1] = "SNDBRE";
+MPassedSFX[2] = "SRKWALL";
+MPassedSFX[3] = "SNDBRE";
+MPassedSFX[4] = "SNDBRE";
+MPassedSFX[5] = "SNDBRE";
+MPassedSFX[6] = "weapons/shotgr";
+MPassedSFX[7] = "SNDBRE";
+MPassedSFX[8] = "SRKWALL";
+MPassedSFX[9] = "SDHEROWW";
+
+//Quest Information;  'a' is an image quest.
+MissionINFO[0] = "???";  //Secret Ending Quest/Easter Egg
+MissionINFO[1] = "Our hideout has been attacked by emperor's elite soldiers - sardaukars. \nMany fremens have fallen defending our sietch. \nI need to \ckget out of here \ccas soon as possible.";
+MissionINFO[2] = "Things have settled down at the hideout, I should \ckcheck it out\cc.";
+MissionINFO[3] = "I killed a single sardaukar but it turns out he wasn't alone here.\nI should \ckhide\cc!";
+MissionINFO[4] = "Uhhh... They went right past me.\nI can't go further knowing there's a whole squad here, so I will have to choose a \ckdifferent way\cc, a path bad known to me...";
+MissionINFO[5] = "I hope this is the \ckright way\cc...";
+MissionINFO[6] = "Good. I made it back to the shelter...\nNow we need to find that \ckthing\cc!";
+MissionINFO[7] = "Great! I found something that will help me defeat commander of the sardaukars!\nWait..!\nI hear the sounds of fremen... And sardaukars!";
+MissionINFO[8] = "The sounds are getting closer... I seem to be going the \ckright way\cc.";
+MissionINFO[9] = "There was a massacre. One fremen against six sardaukars.\nOnly one sardaukar survived and I finished him off with my knife.\nI found the transmitter in Sardaukar's corpse...\nNow I will have to \ckfind a suitable place \ccfor the trap.";
+MissionINFO[10] = "The trap is ready!\nNow I just need to wait for the enemy, commander of the sardaukars, and defat him with mine weapon - Kris!\nIn the name of Paul Muad'dib Atreides!!! Arrakis is our!!! Arrakis for fremens!!!";
+
+}
+
+
+else if (DEApick == 1) //FREMAN
+{
+styleauthor = "\cjD\chE\cjA"; //Fremen eye's color...
+
+BaseCeilingHeight = 188; //the average height of the ceiling
+BaseFloorHeight = 0; //basic floor height, better leave it at 0
+
+
+ThemeNoun[12*mapstyle - 0] = "Fremen ";
+ThemeNoun[12*mapstyle - 1] = "Fedaykin ";
+ThemeNoun[12*mapstyle - 2] = "Naib ";
+ThemeNoun[12*mapstyle - 3] = "Warrior from Arrakis ";
+
+for(int deb = 0; deb < 10; deb++)  VictimCharAdj[deb] = "";
+
+VictimCharNoun[0] = "Mercenary";
+VictimCharNoun[1] = "Harkonnen Troop";
+VictimCharNoun[2] = "Harkonnen Soldier";
+VictimCharNoun[3] = "Harkonnen Officer";
+VictimCharNoun[4] = "Harkonnen Scout";
+VictimCharNoun[5] = "Harkonnen Servant";
+VictimCharNoun[6] = "Baron's Servant";
+VictimCharNoun[7] = "Harkonnen Slave";
+VictimCharNoun[8] = "Soldier from Giedi Prime";
+VictimCharNoun[9] = "Slave from Giedi Prime";
+VictimCharNoun[10] = "Mercenary";
+VictimCharNoun[11] = "Harkonnen Troop";
+
+
+
+
+flatTX[1] = "SAND1"; //Primary floor texture
+flatTX[2] = "SAND1"; //secondary floor texture
+flatTX[3] = "ETEX62"; //secondary flat texture
+flatTX[4] = "ETEX62";  //secondary flat texture
+flatTX[5] = "ETEX62";  //secondary flat texture
+
+flatTX[11] = "YZTX735"; //light texture;
+flatTX[12] = "YZTX735";  //another light texture
+flatTX[13] = "YZTX735"; //rare light texture
+flatTX[16] = "ETEX62";     //1st trap floor texture
+flatTX[17] = "ETEX62";   //2nd trap floor texture
+
+WALLTX[1] = "ETEX62"; //the very main texture
+WALLTX[2] = "ETEX62"; //secondary main texture
+WALLTX[3] = "ETEX62"; //rare texture
+WALLTX[4] = "ETEX62"; //rare texture 2
+WALLTX[5] = "ETEX62"; //rare texture 2
+WALLTX[6] = "ETEX62";  //window texture
+WALLTX[7] = "ETEX62"; //global border wall texture
+wallTX[8] = "MDISKY6"; // sky texture: use a swedish layout skybox texture
+WALLTX[20] = "ETEX62"; //entrance Top texture
+
+interpass = "mdiarc6B"; //a 3d model actor of the interpass between the areas
+bugwall = "mdiwall6B"; //a fake 3dmodel wall used to cover the 3.0 bug
+
+//these are various ambient sounds played around the map
+AmbienceSFX[1] = "SDCAVERN";
+AmbienceSFX[2] = "SDCAVERN";
+AmbienceSFX[3] = "SDCAVERN";
+AmbienceSFX[4] = "SDCAVERN";
+AmbienceSFX[5] = "SND_GUUL";
+AmbienceSFX[6] = "SND_GUUL";
+AmbienceSFX[7] = "SND_GUUL";
+AmbienceSFX[8] = "SND_GUUL";
+
+//this is the various music played when Victim is being chased
+SetCVARstring("MDIchasemusic", "MDICHZ");
+
+//Mutilator
+MutilatorType[0] = "Mutilator100";  //[0] is Mutilator (weapon) for Murderer. Primary array.
+MutilatorType[2] = "FRMT0"; //The mutilator's taunt type, sound
+MutilatorType[3] = "SND_ALIENSTEP"; // sound that is coming from Mutilator while he is walking
+MutilatorType[4] = "Fremen"; //State of Stunyou actor, used when 5:00 and you turn to Mutilator behind you
+SetCvarString("MDIroundmusic", strparam(s:"MDIAMB", i:random(3,8))); //Music theme for a map
+
+//Sound effects of the pain that Mutilator takes.
+MTPAIN[0] = "FRMMLP"; //100hp - 75hp
+MTPAIN[1] = "FRMMMP"; //75hp - 50hp
+MTPAIN[2] = "FRMMHP"; //50hp - 25hp
+MTPAIN[3] = "FRMMCP"; //25hp - 0hp
+MTPAIN[4] = "FRMDTH"; //mutilator's death sound
+
+//Quest done sound.
+MPassedSFX[1] = "SNDBRE";
+MPassedSFX[2] = "SNDBRE";
+MPassedSFX[3] = "SDCLOTH";
+MPassedSFX[4] = "SRKWALL";
+MPassedSFX[5] = "SNDBRE";
+MPassedSFX[6] = "SNDBRE";
+MPassedSFX[7] = "weapons/shotgr";
+MPassedSFX[8] = "SNDBRE";
+MPassedSFX[9] = "weapons/rocklx";//"SDHEROWW";
+
+//Quest Information;  'a' is an image quest.
+MissionINFO[0] = "???";  //Secret Ending Quest/Easter Egg
+MissionINFO[1] = "Damn fremens! We went to this cave for nothing...\nMany of our soldiers were killed, as well as elite emperor's soldiers - sardaukars!\nI must to \ckescape \ccfrom this curse cave!.. Run to Arrakin and inform the 'Beast', Glossu Rabban!";
+MissionINFO[2] = "Heck! I'm lost... And there is dead end! Wait...\nI remember that I ran past some of the ways...\nWe'll have to \ckgo back \ccand go through another way...\nI hope I don't die there...";
+MissionINFO[3] = "I will \ckchoose this path\cc...\nI hope there's a way out...";
+MissionINFO[4] = "Another dead end... \nHowever... I found a critical wounded soldier unconscious and a backpack nearby... \nWith explosives! What a pity... I can't carry all explosives... So heavy for me... And I can't give it to the fremens... And I can't carry it all and it's dangerous...\nI'll probably have to kill him and hide the explosives.\nI will \ckcontinue to search for the right way in the cave \ccthat will lead me to the exit!";
+MissionINFO[5] = "I killed single fremen... The weak, infirm and crtitial wounded fremen... And then with great difficulty!\nI can't believe it... What does the desert planet Arrakis do to humans? Even an invalid is stronger than me!\nDamn... I still have to \ckfind a way out\cc!";
+MissionINFO[6] = "Dead end ? Again ? Heck! It seems that there is no way out...\nGo back to the explosives and wait for help ?\nStop! There's a narrow way here! How did I not notice it ?\nMaybe... That \ckthis path \ccwill lead me to the exit of the cave ?";
+MissionINFO[7] = "What ? I hear the \cksounds of battle\cc!\nDamn blue-eyed people they're causing so much trouble!";
+MissionINFO[8] = "There was a battle here...\nThree sardaukars and one fremen... And in the end, no one won.\nAlthough... I think i'm the winner, because the corpses have better equipment.\nAlso I found sardaukar's transmitter and this shows near the \cklast squad of elite soldiers\cc.\nIf i want survive then i must join them!";
+MissionINFO[9] = "I didn't make it in time... The entire emperor's last squad was killed...\nAnd fremens are strong... But not invincible!\nI remember the \ckpath \ccwhere I hide the critical wounded soldier. He had a backpack full of explosives. Maybe this will help me... For survive!";
+MissionINFO[10] = "I found the explosives... And I tried using it at the entrance, which the Fremen had closed... All explosives is not enough for escape...\nThe fremens probably heard the explosion and are coming here... Okay... Damn, I'm ready to fight even if I die!\nIn the name of the Harkonnens!!! Arrakis will our!";
+
+
+}
+
+mdilights = false;
+mapresource = StrParam(s:"\c", s:FontColor[mapstyle], s:"Strife: Quest for the Sigil\n\c", s:FontColor[mapstyle], s:"Heretic; Hexen: Beyond Heretic\n\c", s:FontColor[mapstyle], s:"Dune, Frank Herbert");
+//ADDITIONAL HELP FROM
+techsuppB = ""; //too many zeberpals everywhere :<
+
+break;
+
+
+
+
+}
+
+
+
+
+
+
+SetCvar("mdispecial4", 0);
+SetCVarString("FixMdiTXbot", WALLTX[1]);
+SetCVarString("FixMdiTXtop", WALLTX[2]);
+
+
+GoalBonus[5] = "SmokebombMDI";
+
+
+for(int iii = 100; iii < 6501; iii++)
+{
+ChangeFloor(iii, flatTX[1]); ChangeCeiling(iii, flatTX[3]);
+ChangeCeiling(iii, flatTX[3]);
+Light_ChangeToValue(iii, 0);
+}
+Floor_MoveToValue(99, 9999, outerFhei);
+Ceiling_MoveToValue(99, 9999, outerChei);
+
+SpawnSpotForced(AmbienceSFX[random(1,8)],1013, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],1313, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],1613, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],3313, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],3613, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],3913, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],5813, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],6113, 0, 0);
+SpawnSpotForced(AmbienceSFX[random(1,8)],6413, 0, 0);
+
+
+
+
+mdiend[1] = "BAD DREAM...";  //string for Secret Ending for this map
+default_songs[0] ="*"; default_songs[1] ="*"; default_songs[2] ="*";default_songs[3] ="*";default_songs[4] ="*"; //fk dwindle music
+
+
+
+
+
+//finalewelcome = "SDJIGSAW"; //Welcoming sound when get to Final Phase
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   QUESTS
+//MutilatorType[5] = "QGHOST"; //ghost image on screen
+//MutilatorType[1] = "";  //[1] is for decorative cases. Like in intro, or appearing behind you.
+mdigame[8] = 48;
+mdigame[9] = 80;
+
+
+
+//dynamic fade with time, RGB vars are default, but will change as time goes on. THis is very sensible setting, change with caution.
+TimeArea[0][0] = 10;
+TimeArea[0][1] = 10;
+TimeArea[0][2] = 16;
+
+//tendencyMultiplier, need if r =/= g =/= b    THis is very sensible setting, change with caution.
+TDmultiplier[0][0] = 1;
+TDmultiplier[0][1] = 1;
+TDmultiplier[0][2] = 2;
+
+endcam[5] = 31001;
+SetLineTexture(19, SIDE_FRONT, TEXTURE_MIDDLE, strparam(s:"mdimov", i:random(1,5)));
+}
+
+
+/*
+these scripts below, allow you to do changes in the geometry when generating is done, the number at the end is your style index!
+What's it for? it allows to do slight changes, for example, you want it to look like a city map, not like some tomb,
+so you level all the ceilings to a certain level via acs, and also change all ceiling's texture to f_SKY, and boom it really looks like a city map
+*/
+
+script "MDI_builder_for1" (void) {} //SPACE, I don't want no changes in the geometry, so it's blank
+script "MDI_builder_for2" (void) {} //EGYPT, I don't want no changes in the geometry, so it's blank
+
+
+script "MDI_builder_for3" (void)
+{
+for(int iii = 100; iii < 6501; iii++)
+{
+//ChangeFloor(iii, flatTX[1]); ChangeCeiling(iii, flatTX[3]);
+ChangeCeiling(iii, "F_SKY1");
+Ceiling_MoveToValue(iii, movespeed, 192);
+}
+Floor_MoveToValue(99, movespeed, 0);
+ChangeFloor(99, flatTX[1]);
+}
+
+
+script "MDI_builder_for4" (void)
+{
+for(int iii = 100; iii < 6501; iii++)
+{
+//ChangeFloor(iii, flatTX[1]); ChangeCeiling(iii, flatTX[3]);
+ChangeCeiling(iii, "F_SKY1");
+Ceiling_MoveToValue(iii, movespeed, 256);
+}
+Ceiling_MoveToValue(99, movespeed, 256);
+Floor_MoveToValue(99, movespeed, 0);
+ChangeFloor(99, "XCTX162B");
+Light_ChangeToValue(99, 0);
+}
+
+
+
+script "MDI_builder_for5" (void) {}
+
+script "MDI_builder_for6" (void)  //change all ceiling texture to cavern ones
+{
+for(int iii = 100; iii < 6501; iii++)
+{
+ChangeFloor(iii, flatTX[1]);
+ChangeCeiling(iii, flatTX[4]);
+}
+}
+
+
+
+
+Script "SardaukarReady" (void) CLIENTSIDE
+{
+setfont("smallfont");
+HudMessage(s:"You can use unique items.\nHold down the main attack button will able you to use alternate attacks.\nHold button around 3 sec will able you use range item.\nYou can combo hold button time for range item!"; HUDMSG_FADEOUT | HUDMSG_LOG, 0, CR_Gold, 0.5, 0.25, 7.5, 1.0 );
+}
+
+Script "SardaukarNotEnough" (void) CLIENTSIDE
+{
+setfont("smallfont");
+HudMessage(s:"You Must Hold Attack Button more for activate this item!\nYou hold attack button ",i:CheckInventory("SRKHoldPoints")/35,s:" seconds."; HUDMSG_FADEOUT | HUDMSG_LOG, 0, CR_Gold, 0.5, 0.29, 4.5, 1.0 );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*WWWWWNWWWWWWWWWWWWWWWNWWNNNNNNNWWWWWWWWWWWWWWNWWWWWWW
+WWWWWW:-NWWWWWy:dWWWWN:/WN/`-oo++/++odWNWWWWWh::WWWWWWW
+WWWWWWo oWWWWN` /WWWWy`dWW+ sWWWWNWdy+::/yNWWy /WWWWWWW
+WWWWWWW:`dWWWs.: hWWN.sWWWy sWWWWWWWWWWd: /WWW /WWWWWWW
+WWWWWWWN/.WWN:dW`-WWo:WWWWW +WWWWWWWWWWWs .WWN oWWWWWWW
+WWWWWWWWN--W+yWWy hd.WWWWWW +WWWWWWWWWWd.-dWWN`oWWWWWWW
+WWWWWWWWWd`::WWWW-..sWWWWWW oWWWWWWWWW+/hNWWWN`oWWWWWWW
+WWWWWWWWWW+ hWWWWy .NWWWWWh /WWNWdyyshWNWWWWWd +WWWWWWW
+WWWWWWWWWWNsWWWWWWodWWWWWdo+syyyhdWNWWWWWWWWWhsWWWWWWWW
+WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW*/
+
+Script 778 Enter // Speed setter script (handles the combat slowdown and everything) REPLACES WDI CORE SCRIPT >_>
+{
+}
+
+
+
+script 999 (void)  NET CLIENTSIDE // Change uniform script, don't touch it
+{
+str SetClothColour = StrParam(s: ClothCode[GetAmmoCapacity("ClothStatus")]); //a precaution string
+	if (CheckInventory("MurdererKey"))
+	{
+Print(s:"You are blood-colored mutilator. No need to change.");
+LocalAmbientSound("SDDNOPE", 127);
+}
+else if ((!CheckInventory("MurdererKey")) && (GetAmmoCapacity("ClothStatus")<=0))
+	{
+Print(s:"You have to find some cloths to change first");
+LocalAmbientSound("SDDNOPE", 127);
+}
+else if ((!CheckInventory("MurdererKey")) && (GetAmmoCapacity("ClothStatus")>0))
+	{
+	ConsoleCommand(SetClothColour);
+Print(s:"Changed colours to ", s: ClothName[GetAmmoCapacity("ClothStatus")]);
+ActivatorSound("SDCLOTH", 127);
+}
+Delay(40);
+}
+
+
+
+
+
+Script 411 Enter //don't touch it
+{
+}
+
+
+Script "WDI_PAIN_SFX" (void)
+{
+if (checkInventory("IsVictim"))
+{
+if (CheckInventory("victim1"))
+{If (GetActorProperty(ActivatorTID(),APROP_HEALTH)>=75){ActivatorSound("P1Pain1", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=50)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<75)){ActivatorSound("P1Pain7", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=25)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<50)){ActivatorSound("P1Pain5", 127);}
+else If (GetActorProperty(ActivatorTID(),APROP_HEALTH)<25){ActivatorSound("P1Pain2", 127);}
+}
+else if (CheckInventory("victim2"))
+{If (GetActorProperty(ActivatorTID(),APROP_HEALTH)>=75){ActivatorSound("P2Pain1", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=50)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<75)){ActivatorSound("P2Pain7", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=25)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<50)){ActivatorSound("P2Pain5", 127);}
+else If (GetActorProperty(ActivatorTID(),APROP_HEALTH)<25){ActivatorSound("P2Pain2", 127);}
+}
+else if (CheckInventory("victim3"))
+{If (GetActorProperty(ActivatorTID(),APROP_HEALTH)>=75){ActivatorSound("V3Pain1", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=50)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<75)){ActivatorSound("V3Pain7", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=25)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<50)){ActivatorSound("V3Pain5", 127);}
+else If (GetActorProperty(ActivatorTID(),APROP_HEALTH)<25){ActivatorSound("V3Pain2", 127);}
+}
+else if (CheckInventory("victim4"))
+{If (GetActorProperty(ActivatorTID(),APROP_HEALTH)>=75){ActivatorSound("V4Pain1", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=50)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<75)){ActivatorSound("V4Pain7", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=25)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<50)){ActivatorSound("V4Pain5", 127);}
+else If (GetActorProperty(ActivatorTID(),APROP_HEALTH)<25){ActivatorSound("V4Pain2", 127);}
+}
+}
+else if (checkInventory("IsMutilator"))
+{If (GetActorProperty(ActivatorTID(),APROP_HEALTH)>=75){ActivatorSound(MTPAIN[0], 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=50)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<75)){ActivatorSound(MTPAIN[1], 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=25)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<50)){ActivatorSound(MTPAIN[2], 127);}
+else If (GetActorProperty(ActivatorTID(),APROP_HEALTH)<25){ActivatorSound(MTPAIN[3], 127);}
+}
+else
+{
+for(int si = 0; si < 17; si++)
+If (ActivatorTID() == TID_START+wdisounclassA[si]){If (GetActorProperty(ActivatorTID(),APROP_HEALTH)>=75){ActivatorSound("P1Pain1", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=50)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<75)){ActivatorSound("P1Pain7", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=25)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<50)){ActivatorSound("P1Pain5", 127);}
+else If (GetActorProperty(ActivatorTID(),APROP_HEALTH)<25){ActivatorSound("P1Pain2", 127);}
+}
+else If (ActivatorTID() == TID_START+wdisounclassB[si]){If (GetActorProperty(ActivatorTID(),APROP_HEALTH)>=75){ActivatorSound("P2Pain1", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=50)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<75)){ActivatorSound("P2Pain7", 127);}
+else If ((GetActorProperty(ActivatorTID(),APROP_HEALTH)>=25)&&(GetActorProperty(ActivatorTID(),APROP_HEALTH)<50)){ActivatorSound("P2Pain5", 127);}
+else If (GetActorProperty(ActivatorTID(),APROP_HEALTH)<25){ActivatorSound("P2Pain2", 127);}
+}
+}
+}
+
+Script "WDI_DEATH_SFX" (void) //don't touch it
+{
+if (checkInventory("IsVictim"))
+{
+if (CheckInventory("victim1")) {ActivatorSound("MKDEATH", 127);} else if (CheckInventory("victim2")) {ActivatorSound("MKDEATH", 127);}
+else if (CheckInventory("victim3")) {ActivatorSound("V3Death", 127);} else if (CheckInventory("victim4")) {ActivatorSound("V4ANDTH", 127);}}
+
+else if (checkInventory("IsMutilator")){ActivatorSound(MTPAIN[4], 127);}
+else {ActivatorSound("MKDEATH", 127);}
+}
+
+Script "WDI_XDEATH_SFX" (void) //don't touch it
+{
+if (checkInventory("IsVictim"))
+{
+if (CheckInventory("victim1")) {ActivatorSound("MKDEATH", 127);} else if (CheckInventory("victim2")) {ActivatorSound("MKDEATH", 127);}
+else if (CheckInventory("victim3")) {ActivatorSound("V3Death", 127);} else if (CheckInventory("victim4")) {ActivatorSound("V4ANDTH", 127);}}
+
+else if (checkInventory("IsMutilator")){ActivatorSound(MTPAIN[4], 127);}
+else {ActivatorSound("MKDEATH", 127);}
+}
+
+
+
+script "Theatre_Death" DEATH
+{
+if (GetCVAR("MDISTATE") > 2) terminate;
+SpawnSpotForced("VictimBody", 30000 + Playernumber(), 0, 0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+script "CLIENTSTUFF" OPEN CLIENTSIDE
+{
+//if (!Client_action()) terminate;
+int counter;
+int ANGx;
+int ANGy;
+int hounANGx;
+int hounANGy;
+int spirANGx;
+int spirANGy;
+bool FIXTX;
+
+//hudmesageonactor
+    int tid;
+
+    int halfWidth, halfHeight;
+    int imageX, imageY;
+
+    int angle, pitch;
+    int viewHeight;
+
+    int wX, wY, wZ;
+    int rX, rY;
+
+	int height;
+	int way;
+    int wep;
+
+SetActivatorToPlayer(ConsolePlayerNumber());
+While(GetCVAR("MDISTATE") == 2)
+{
+if ((FIXTX == false) &&  (Client_action()))
+{
+for(int a = 1001; a < 65000; a ++)
+     {
+	  SetLineTexture(a, SIDE_FRONT, TEXTURE_TOP, GetCVarString("FixMdiTXtop"));
+	  SetLineTexture(a, SIDE_FRONT, TEXTURE_BOTTOM, GetCVarString("FixMdiTXbot"));
+	  SetLineTexture(a, SIDE_BACK, TEXTURE_TOP, GetCVarString("FixMdiTXtop"));
+	  SetLineTexture(a, SIDE_BACK, TEXTURE_BOTTOM, GetCVarString("FixMdiTXbot"));
+	 }
+	  SetLineTexture(25, SIDE_FRONT, TEXTURE_TOP, GetCVarString("FixMdiTXtop"));
+	  SetLineTexture(25, SIDE_FRONT, TEXTURE_BOTTOM, GetCVarString("FixMdiTXbot"));
+	  SetLineTexture(25, SIDE_BACK, TEXTURE_TOP, GetCVarString("FixMdiTXtop"));
+	  SetLineTexture(25, SIDE_BACK, TEXTURE_BOTTOM, GetCVarString("FixMdiTXbot"));
+FIXTX = true;
+}
+while(counter < 32)
+ {
+ //print(s:"B");
+  if (GetCVAR(StrParam(s:"PSPECIAL", i:counter)) == 1)
+      {
+	  ANGx = GetActorX(TID_START+counter) + FixedMul(cos(GetActorAngle(TID_START+counter)), 64.0);
+	  ANGy = GetActorY(TID_START+counter) + FixedMul(sin(GetActorAngle(TID_START+counter)), 64.0);
+      SpawnForced("MDIlightCLIENT", ANGx, ANGy, GetActorZ(TID_START+counter) + 8.0, 0, 0);
+      }
+    counter++;
+  }
+
+if (PlayerIsSpectator(ConsolePlayerNumber()) < 1)
+    {
+    consolecommand("gl_lights 1");
+	consolecommand("gl_lights_size 1.0");
+    consolecommand("gl_fogmode 1");
+    consolecommand("gl_use_models 1");
+	//consolecommand("developer 0");
+    }
+
+If (CheckInventory("MurdererKey")) //Latent flashlight
+   {
+  if (GetCVAR(StrParam(s:"PSPECIAL", i:consoleplayernumber())) == 2)
+      {
+	  ANGx = GetActorX(TID_START+consoleplayernumber()) + FixedMul(cos(GetActorAngle(TID_START+consoleplayernumber())), 64.0);
+	  ANGy = GetActorY(TID_START+consoleplayernumber()) + FixedMul(sin(GetActorAngle(TID_START+consoleplayernumber())), 64.0);
+      SpawnForced("MDIlightCLIENTB", ANGx, ANGy, GetActorZ(TID_START+consoleplayernumber()) + 8.0, 0, 0);
+      }
+   }
+
+//DARKNESS MARKERS
+if ((GetCVAR(StrParam(s:"PSPECIAL", i:ConsolePlayerNumber())) == 0) &&  (Client_action()) && (gameinfo[2] != ConsolePlayerNumber()) && (PlayerIsSpectator(ConsolePlayerNumber()) == 0))
+{
+		  SetFont("ENTRYHOR");
+        halfWidth = GetScreenWidth() >> 1;
+        halfHeight = GetScreenHeight() >> 1;
+
+        angle = GetActorAngle(0);
+        pitch = GetActorPitch(0);
+
+        height = GetActorViewHeight(0);
+
+        for(way = 20000; way < 20128; way++)
+        {
+
+            wX = GetActorX(way) - GetActorX(0);
+            wY = GetActorY(way) - GetActorY(0);
+            wZ = GetActorZ(way) + (GetActorProperty(tid, APROP_HEIGHT) >> 1) - (GetActorZ(0));
+
+            rX = FixedMul(wX, cos(angle)) + FixedMul(wY, sin(angle));
+            rY = -FixedMul(wX, sin(angle)) + FixedMul(wY, cos(angle));
+
+            wX = FixedMul(rX, cos(pitch)) + FixedMul(wZ, sin(pitch));
+
+            if(wX > 0)
+            {
+                wZ = -FixedMul(rX, sin(pitch)) + FixedMul(wZ, cos(pitch));
+
+                imageX = (halfWidth << 16) - (halfWidth * FixedDiv(rY, wX));
+                imageY = (halfHeight << 16) + FixedMul(halfHeight * 1.6, FixedDiv(wZ, wX));
+
+                SetHudSize(halfWidth << 1, halfHeight << 1, true);
+                HudMessage(s:"A"; HUDMSG_PLAIN, 3000 + way, CR_UNTRANSLATED, imageX & 0xFFFF0000, imageY & 0xFFFF0000, 0.1);
+            }
+        }
+}
+
+
+
+counter = 0;
+delay(1);
+}
+
+
+// show weapon cost
+While(GetCVAR("MDISTATE") == 3)
+{
+if ((gameinfo[2] != ConsolePlayerNumber()) && (Client_action()))
+{
+		SetFont("confont");
+        halfWidth = GetScreenWidth() >> 1;
+        halfHeight = GetScreenHeight() >> 1;
+
+        angle = GetActorAngle(0);
+        pitch = GetActorPitch(0);
+
+        height = GetActorViewHeight(0);
+
+        for(wep = 9101; wep < 9101 + CheckInventory("mdipts")/5; wep++)
+        {
+
+            wX = GetActorX(wep) - GetActorX(0);
+            wY = GetActorY(wep) - GetActorY(0);
+            wZ = GetActorZ(wep) + (GetActorProperty(tid, APROP_HEIGHT) >> 1) - (GetActorZ(0));
+
+            rX = FixedMul(wX, cos(angle)) + FixedMul(wY, sin(angle));
+            rY = -FixedMul(wX, sin(angle)) + FixedMul(wY, cos(angle));
+
+            wX = FixedMul(rX, cos(pitch)) + FixedMul(wZ, sin(pitch));
+
+            if(wX > 0)
+            {
+                wZ = -FixedMul(rX, sin(pitch)) + FixedMul(wZ, cos(pitch));
+
+                imageX = (halfWidth << 16) - (halfWidth * FixedDiv(rY, wX));
+                imageY = (halfHeight << 16) + FixedMul(halfHeight * 1.6, FixedDiv(wZ, wX));
+
+                SetHudSize(halfWidth << 1, halfHeight << 1, true);
+               HudMessage(s:"$", i:5*(wep-9100); HUDMSG_PLAIN, 3000 + wep, CR_GREY, imageX & 0xFFFF0000, imageY & 0xFFFF0000, 0.1);
+            }
+        }
+}
+delay(1);
+}
+if (GetCVAR("MDISTATE") == 4) terminate;
+
+delay(5);
+restart;
+}
+
+
+
+
+
+Script "MDIpulsePREP" (void)
+{
+for(int a = 0; a < 32; a++)
+{
+GiveActorInventory(TID_START + a, "MDIQuickMark", 1 );
+}
+delay(15);
+Thing_Remove(22400 + gameinfo[2]);
+delay(200);
+for(int b = 0; b < 32; b++)
+{
+Thing_Remove(22400 + b);
+}
+}
+
+
+
+Script "MDI_MarkVictim" (void)
+{
+SpawnSpotForced("MapSpot", ActivatorTID(), 22400 + PlayerNumber(), 0);
+}
+
+
+
+Script "MDIpulse" (void) Clientside // by Kaminsky
+{
+AmbientSound("YZLAUGHA", 127);
+
+if (!Client_action()) terminate;
+
+int time = 200;
+    int tid;
+
+    int halfWidth, halfHeight;
+    int imageX, imageY;
+
+    int angle, pitch;
+    int viewHeight;
+
+    int wX, wY, wZ;
+    int rX, rY;
+
+	int height;
+	int way;
+	int step;
+
+    while(time > 0)
+    {
+		{
+		if (step > 33) step = 1;
+		else step++;
+		}
+		    SetFont(strparam(s:"mdift", i: step));
+        halfWidth = GetScreenWidth() >> 1;
+        halfHeight = GetScreenHeight() >> 1;
+
+        angle = GetActorAngle(0);
+        pitch = GetActorPitch(0);
+
+        height = GetActorViewHeight(0);
+
+        for(way = 22400 + 0; way < 22400 + 32; way++)
+        {
+            /*if(CheckActorInventory(600 + way, "MurderMarker"))
+            {
+                continue;
+            }*/
+
+            //tid = TID_START + way;
+
+            wX = GetActorX(way) - GetActorX(0);
+            wY = GetActorY(way) - GetActorY(0);
+            wZ = GetActorZ(way) + (GetActorProperty(tid, APROP_HEIGHT) >> 1) - (GetActorZ(0));
+
+            rX = FixedMul(wX, cos(angle)) + FixedMul(wY, sin(angle));
+            rY = -FixedMul(wX, sin(angle)) + FixedMul(wY, cos(angle));
+
+            wX = FixedMul(rX, cos(pitch)) + FixedMul(wZ, sin(pitch));
+
+            if(wX > 0)
+            {
+                wZ = -FixedMul(rX, sin(pitch)) + FixedMul(wZ, cos(pitch));
+
+                imageX = (halfWidth << 16) - (halfWidth * FixedDiv(rY, wX));
+                imageY = (halfHeight << 16) + FixedMul(halfHeight * 1.6, FixedDiv(wZ, wX));
+
+                SetHudSize(halfWidth << 1, halfHeight << 1, true);
+                HudMessage(s:"A"; HUDMSG_PLAIN, 4000 + way, CR_UNTRANSLATED, imageX & 0xFFFF0000, imageY & 0xFFFF0000, 0.1);
+            }
+        }
+time--;
+delay(1);
+}
+}
+
+
+
+
+
+
+
+
+Script "SecretEndingMessage" (void)  //Outro text when activating secret ending
+{
+str SecretEndingMessage = StrParam(s:"Woah! What a f*ed up dream that was! \n\n This ", n:gameinfo[2]+1, s:" was really scary though! Thank god that ", s:GetCVarString("SecretEnder"), s:" hinted me it was a nightmare... \n\nQuite tough for a dream: ", s: victimstring[tallycounts[0]], s: " people were killed, ", s: victimstring[tallycounts[1]], s: " died from the unknown cause and ", s:victimstring[playinfo[3]], s: " disappeared without a trace. \n\nBetter stop watching NSFW movies in the late night!");
+SetFont("smallfont");
+HudMessageBold(s: SecretEndingMessage ;  HUDMSG_TYPEON, 0, CR_RED, 0.5, 0.5/*320.0, 242.0*/, 35.0, 0.05, 10.0);
+}
+
+Script "SecOutroTheme" (void)
+{
+SetMusic("PG34MUSO");
+}
+
+
+
+Script "SecretEndingAdditional" (void) //Here you do any additional actions when Secret ending appear
+{
+int counter;
+while(counter< 16)
+{
+str joey = strparam(s:"joeyb", i:counter);
+SetHUDSize(360, 212, 0);
+SetFont(joey);
+HudMessageBold (s:"A"; HUDMSG_PLAIN, 5555, CR_GREY, 180.0, 106.0, 0.0);
+counter++;
+delay(5);
+}
+
+}
+
+
+
+
+
+
+Script "MutilatorEndingAdditional" (void) //Here you do any additional actions when Mutilator win
+{
+SetLineTexture(22, SIDE_FRONT, TEXTURE_MIDDLE, "MDISKY0");
+ChangeFloor(5, "MDISKY0");
+ChangeCeiling(5, "MDISKY0");
+SpawnSpotForced("md_blud", 9, 0, 0);
+SpawnSpotForced("VictimBody", 10, 0, 0);
+}
+
+Script "VictimEndingAdditional" (void) //Here you do any additional actions when Victims win
+{
+SetLineTexture(22, SIDE_FRONT, TEXTURE_MIDDLE, "MDISKY0");
+ChangeFloor(5, "MDISKY0");
+ChangeCeiling(5, "MDISKY0");
+SpawnSpotFacingForced ("TCPDCar", 15, 0);
+SpawnSpotFacingForced ("PoliceLight", 15, 0);
+
+SpawnSpotFacingForced ("MUS_POLICESIRENRAID", 16, 0);
+SpawnSpotFacingForced("PoliceRaider", 10, 0);
+SetLineTexture(17, SIDE_FRONT, TEXTURE_MIDDLE, "VOINI96");
+SetLineTexture(17, SIDE_BACK, TEXTURE_MIDDLE, "VOINI96");
+}
+
+Script "MDI_GAME_STARTS_additionals"  (void) // Here you do any additional actions you want to, only after cutscene is done and game has started
+{
+}
+
+Script "MDI_PerHourAdditional"  (void) // Here you do any additional actions when time advance by 1 hour
+{
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   Physical Map only
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// //// /// // /
+
+
+
+SCRIPT "PREPARATIONS" OPEN
+{
+SpawnSpotForced("mdimall", 30900, 0, 0);
+SpawnForced("SND_MovieProj", 4672.0, -6752.0, 384.0, 0, 0);
+}
+
+
+
+
+
+script "FINAL_PHASE_add" (void)
+{
+
+
+delay(1);
+for(int a = 0; a < 32; a ++) SetActorAngle(TID_START + a, 0.75);
+SetLineTexture(8, SIDE_FRONT, TEXTURE_MIDDLE, "URDOOR06"); SetLineTexture(8, SIDE_BACK, TEXTURE_MIDDLE, "URDOOR06");
+SetLineTexture(7, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+SetLineTexture(19, SIDE_FRONT, TEXTURE_MIDDLE, "MDIWARN2");
+SetLineBlocking(2, BLOCK_NOTHING);
+delay(9*35);
+SetLineTexture(19, SIDE_FRONT, TEXTURE_MIDDLE, "MDIWARN3");
+delay(20*35);
+SetLineTexture(18, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+SetLineBlocking(19, BLOCK_NOTHING);
+CEILING_LowerByValue(32, 4, 8);
+delay(10*35);
+Floor_LowerByValue(26, 4, 64);
+delay(4*35);
+SetLineTexture(19, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+}
+
+
+
+
+function str ClockTime(int seconds) { //TY DrinkyBird
+    int m = seconds / 60;
+    int s = seconds % 60;
+
+    str result = StrParam(d: m, s: ":");
+    if (s < 10) result = StrParam(s: result, d: 0);
+    result = StrParam(s: result, d: s);
+    return result;
+}
+
+
+
+script "ZebTimer" (void)
+{
+int timeee = 400 + Playercount()*10;   //420
+
+while(timeee > 0)
+{
+if (timeee == 320) SpawnSpot("StunGas", random(22900, 22931));
+if (timeee == 210) endcam[10] = 1;
+if (timeee == 60) SpawnSpot("CoinKey", random(22900, 22931));
+
+
+setfont("confont");
+HudMessageBold(s:"\n\n\n", s:ClockTime(timeee);
+HUDMSG_PLAIN, 3434, CR_RED, 0.95, 0.02, 3.0);
+
+timeee--;
+
+delay(sek);
+}
+
+ACS_NamedExecute("FINAL_PHASE", 0);   //////////////////////////////end catmouse game and go to final phase
+SetCVAR("MDISTATE", 3);
+}
+
+
+
+
+
+
+
+
+int MDITELEPORTC = 31000;
+script "MDI_INTRO" (VOID)
+{
+SetLineTexture(19, SIDE_FRONT, TEXTURE_MIDDLE, "MDIWARN1");
+delay(35*5);
+
+str andproduce = "";
+str produced = "Produced by Zeberpal";
+if (StrCmp(styleauthor, "Zeberpal") == 0)  {andproduce = "and produced "; produced = "";}
+str techsupp = StrParam(s:"\c", s:FontColor[mapstyle], s:"Kaminsky\n\c", s:FontColor[mapstyle], s:"DrinkyBird\n\c", s:FontColor[mapstyle], s:"DEA\n");
+
+FadeTo (0, 0, 0, 1.0, 5.0);
+int counter;
+
+
+delay(sek*5);
+While(counter < 32)
+ {
+ Thing_move(TID_START + counter, MDITELEPORTC + counter, 1);
+ SetActorAngle(TID_START + counter, Getactorangle(MDITELEPORTC + counter));
+ counter++;
+ }
+ delay(sek);
+AmbientSound("MUSRAVEN", 127);
+
+//Show map info
+Int Number = random(0,2);
+str maptitle = "";
+int RNG = random(0,4);
+
+
+
+switch(RNG)
+{
+case 0:   maptitle = StrParam(s:AcciNoun[random(0,9)],s:TitleAdject[random(1,14)], s:ThemeNoun[(mapstyle*12  - random(4,11))], s:TitleNumber[Number]);break; //ACCIDENT IN      HAUNTED     BASE     0/1-6
+case 1:   maptitle = StrParam(s:AcciNoun[random(0,9)],s:TitleAdject[random(1,14)], s:ThemeNoun[(mapstyle*12  - random(4,11))], s:TitleNumber[Number]);break; //ACCIDENT IN      HAUNTED     BASE     0/1-6
+case 2:   maptitle = StrParam(s:AcciNoun[random(0,9)],s:TitleAdject[0], s:ThemeNoun[(mapstyle*12  - random(4,11))], s:TitleNumber[Number]);break; //ACCIDENT IN     'THE'   BASE
+case 3:   maptitle = StrParam(s:TitleAdject[0],s:TitleAdject[random(1,14)], s:ThemeNoun[(mapstyle*12  - random(0,11))], s:TitleNumber[Number]);break; //ACCIDENT IN      HAUNTED     BASE     0/1-6
+case 4:   maptitle = StrParam(s:ThemeNoun[(mapstyle*12  - random(0,11))], s:TitleNumber[random(1,2)]);break; //ACCIDENT IN      HAUNTED     BASE     0/1-6 /*s:TitleAdject[0],*/
+}
+
+SetHudSize(384, 288, FALSE);
+SetFont("confont");
+HudMessageBold(s:"Directed ", s:andproduce, s:"by ", s:styleauthor; HUDMSG_FADEINOUT, 0, CR_GREY, 192.0, 80.0, 4.0, 1.0, 1.0);
+
+Delay(35);
+
+SetHudSize(512, 384, FALSE);
+SetFont("confont");
+HudMessageBold(s:produced; HUDMSG_FADEINOUT, 0, CR_GREY, 256.0, 124.0, 3.0, 1.0, 1.0);
+
+Delay(35);
+
+while(gameinfo[1] != GAMESTATE_GAMEACTIVE)
+{
+SetHudSize(384, 288, FALSE);
+SetFont("confont");
+HudMessageBold(s:"Directed ", s:andproduce, s:"by ", s:styleauthor; HUDMSG_FADEINOUT, 0, CR_GREY, 192.0, 80.0, 1.0, 1.0, 1.0);
+setfont("BIGFONT");
+hudmessageBold(s:"\c",s:FontColor[mapstyle], s:maptitle; HUDMSG_FADEINOUT, 0, CR_UNTRANSLATED, 192.0, 116.0, 1.0, 1.0, 1.0);
+SetHudSize(512, 384, FALSE);
+SetFont("confont");
+HudMessageBold(s:produced; HUDMSG_FADEINOUT, 0, CR_GREY, 256.0, 124.0, 1.0, 1.0, 1.0);
+delay(35);
+
+}
+delay(35);
+SetHudSize(512, 384, FALSE);
+
+     SetFont("BIGFONT");
+     HudMessageBold(s:"\c",s:FontColor[mapstyle],s:"TECHNICAL SUPPORT"; HUDMSG_FADEINOUT, 2033, CR_UNTRANSLATED, 64.0, 64.0, 60.0, 1.0, 1.0);
+	 SetFont("confont");
+	 hudmessageBold(s:techsupp, s:techsuppB;       HUDMSG_FADEINOUT, 2034, CR_UNTRANSLATED, 64.0, 88.0, 60.0, 1.0, 1.0);
+
+     SetFont("BIGFONT");
+     HudMessageBold(s:"\c",s:FontColor[mapstyle],s:"RESOURCES BY"; HUDMSG_FADEINOUT, 2035, CR_UNTRANSLATED, 448.0, 64.0, 60.0, 1.0, 1.0);
+	 SetFont("confont");
+	 hudmessageBold(s:mapresource;             HUDMSG_FADEINOUT, 2036, CR_UNTRANSLATED, 448.0, 88.0, 60.0, 1.0, 1.0);
+
+
+
+SetFont("BIGFONT");
+    HudMessageBold(s:"\c",s:FontColor[mapstyle],s:"STARRING"; HUDMSG_FADEINOUT, 2032, CR_UNTRANSLATED, 256.0, 112.0, 60.0, 1.0, 1.0);
+SetFont("confont");
+int counterb = 0;
+int success = 0;
+
+
+
+while (counterb < 32)
+  {
+    if (ClassifyActor(TID_START+counterb) & ACTOR_ALIVE)
+	 {
+	   if (CheckActorInventory(TID_START+counterb, "MurdererKey"))  //if muti
+	   HudMessageBold(
+	   n:counterb + 1, s:"\c",s:FontColor[mapstyle], s:"  as ", s:ThemeNoun[mapstyle*12  - random(0,3)]; HUDMSG_FADEINOUT, 2000+counterb, CR_UNTRANSLATED, 256.0, 128.0 + (12*success*1.0), 60.0, 1.0, 1.0);
+
+	   else if ((CheckActorInventory(TID_START+counterb, "Victim1")) | (CheckActorInventory(TID_START+counterb, "Victim2"))) //if male
+	   HudMessageBold(
+	   n:counterb + 1, s:"\c",s:FontColor[mapstyle], s:"  as ", s:VictimCharAdj[random(0,9)], s:VictimCharNoun[random(0,4)]; HUDMSG_FADEINOUT, 2000+counterb, CR_UNTRANSLATED, 256.0, 128.0 + (12*success*1.0), 60.0, 1.0, 1.0);
+
+	   else if ((CheckActorInventory(TID_START+counterb, "Victim3")) | (CheckActorInventory(TID_START+counterb, "Victim4"))) //if female
+	   HudMessageBold(
+	   n:counterb + 1, s:"\c",s:FontColor[mapstyle], s:"  as ", s:VictimCharAdj[random(0,9)], s:VictimCharNoun[random(5,9)]; HUDMSG_FADEINOUT, 2000+counterb, CR_UNTRANSLATED, 256.0, 128.0 + (12*success*1.0), 60.0, 1.0, 1.0);
+
+	   else //if normal wdi skin
+	   HudMessageBold(
+	   n:counterb + 1, s:"\c",s:FontColor[mapstyle], s:"  as ", s:VictimCharAdj[random(0,9)], s:"Marine"; HUDMSG_FADEINOUT, 2000+counterb, CR_UNTRANSLATED, 256.0, 128.0 + (12*success*1.0), 60.0, 1.0, 1.0);
+
+	   success++;
+	 }
+	counterb++;
+  }
+
+}
+
+
+
+
+
+
+
+script "MDI_PROLOGUE" (void)
+{
+//Launching Builder
+Wdi_Setinvulnerable(TRUE);
+ACS_NamedExecute("Builder", 0);
+SetMusic("MDILOAD");
+while(BuildingDone == false)
+{
+SetHudSize(384, 288, FALSE);
+SetFont("confont");
+HudMessageBold(s:"LOADING ", d: (FixedDiv(Int2Fix(loadbit), Int2Fix(64)) * 100) >> 16, s:"%"; HUDMSG_PLAIN, 1414, CR_GREY, 192.0, 16.0, 1.0);
+
+delay(5);
+}
+
+HudMessageBold(s:"BUILDING COMPLETE"; HUDMSG_FADEOUT, 1414, CR_GREY, 192.0, 16.0, 0.5, 1.0);
+//SetCVAR("WDIMDIspecial1", ENTRYnum);
+for(int k = 0; k < 37; k++)
+{
+	   HudMessageBold(
+	   s:""; HUDMSG_FADEOUT, 2000 + k, CR_UNTRANSLATED, 256.0, 128.0, 1.0, 1.0);
+}
+SetMusic("D_TISHIN");
+delay(sek);
+//ACS_NamedExecute("MDI_TeleportToMap2", 0);
+mdiprologue = false;
+Wdi_Setinvulnerable(FALSE);
+SetMusic(strparam(s:GetCvarString("MDIroundmusic")));
+//ACS_NamedExecute("SendPosesClient", 0);
+delay(70);
+ACS_NamedExecute("ZebTimer", 0);
+}
+
+
+script "S_MutilatorSpecial" (void)
+{
+ACS_NamedExecute("S_ManiacLaugh",0);
+ACS_NamedExecute("MutiRegen", 0);
+ACS_NamedExecuteAlways("MutilatorWait",0);
+GiveInventory("IsMutilator",1);
+GiveInventory("FistPenalty",2);
+//ACS_NamedExecuteAlways("LookAtVictims",0);
+ACS_NamedExecute("MutilarMapAdd",0);
+TakeInventory("MarkMe", 99);
+delay(35);
+LocalSetMusic(strparam(s:GetCvarString("MDIroundmusic")));
+}
+
+
+
+
+
+
+
+script "S_VictimSpecial" (void)
+{
+if ((checkInventory("Victim1"))||(checkInventory("Victim2"))||(checkInventory("Victim3"))||(checkInventory("Victim4")))  {}
+else { GiveInventory(strparam(s:"VICTIM", i:random(1,4)), 1);} //give victim shit to this ignorant motherfucker already
+//ACS_NamedExecuteAlways("S_SetMission",0);
+
+SetActorProperty(0, APROP_Mass, 100);
+SetAmmoCapacity("AreaTarget", RandArea[random(1,3)]);
+SetAmmoCapacity("StageStatus", 100);
+SetAmmoCapacity("PersonaLuck", random(1,4));
+GiveInventory("IsVictim",1);
+SetAmmoCapacity("PTSchance", 0);
+GiveInventory("QuestTimer",60);
+GiveInventory("FistPenalty",2);
+GiveInventory("SStamina", 9999);
+TakeInventory("Flare", 99);
+ACS_NamedExecuteALWAYS("VictimMapAdd",0);
+			delay(15);
+			//ACS_NamedExecuteAlways("RADAR",0);
+			ACS_NamedExecuteAlways("STAGEinfo",0);
+			delay(5);
+}
+
+
+
+
+
+
+
+
+Script "SS_NoPickBrick" (void)
+{
+Print(s:"Cannot pull out bricks from here!");
+}
+
+Script "SS_NoPickBrick2" (void)
+{
+Print(s:"This Stone is too heavy to pick up!");
+}
+
+
+
+
+
+script "STAGE" (void) {}
+
+Script "S_SetMission" (void) {}
+
+
+
+
+
+Script "SINGLE" (VOID)
+{
+fadeto(0,0,0, 1.0, 1.0);
+
+delay(35);
+GiveInventory("ALLMAP", 1);
+GiveInventory("IsVictim", 1);
+delay(70);
+Teleport(MDITELEPORTA + random(0,31));
+ACS_NamedExecute("Builder", 0);
+fadeto(0,0,0, 0.0, 2.0);
+delay(35);
+for(int iii = 98; iii < 6501; iii++)
+{
+Light_ChangeToValue(iii, 128);
+}
+mdiprologue = false;
+SetCVAR("MDISTATE", 2);
+}
+
+
+
+
+
+
+Script "STAGEinfo" (void)
+{
+While(GetAmmoCapacity("StageStatus")<1200)
+{
+SetFont("confont");
+     if (GetAmmoCapacity("StageStatus")==555)      HudMessage(s: MissionINFO[11]; HUDMSG_FADEOUT, 1777, CR_GREY, 0.5, 0.97, 2.0, 1.0 );
+else if (GetAmmoCapacity("StageStatus")==666)      HudMessage(s: MissionINFO[12]; HUDMSG_FADEOUT, 1777, CR_GREY, 0.5, 0.97, 2.0, 1.0 );
+else if (GetAmmoCapacity("StageStatus")==669)      HudMessage(s: MissionINFO[13]; HUDMSG_FADEOUT, 1777, CR_GREY, 0.5, 0.97, 2.0, 1.0 );
+else
+HudMessage(s: MissionINFO[GetAmmoCapacity("StageStatus")/100]; HUDMSG_FADEOUT, 1777, CR_GREY, 0.5, 0.97, 2.0, 1.0 );
+delay(70);
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+script "TELEPORTA" ENTER
+{
+SetCVAR(strparam(s:"PSPECIAL", i:PlayerNumber()), 0);
+delay(35 + PlayerNumber());
+Thing_move(ActivatorTid(),30000 + PlayerNumber(), 0);
+}
+
+
+
+Script "S_UndeadCome" (void)
+{
+AmbientSound("YZLAUGHA", 127);
+SpawnspotForced("Trite", Telepoint[random(1,62)], 11444, 0);
+delay(35);
+SpawnspotForced("FemaleZombie", Telepoint[random(1,62)], 11444, 0);
+SpawnspotForced("FemaleZombie", 9118, 11444, 0);
+SpawnspotForced("Trite", 9107, 11444, 0);
+}
+
+
+
+
+
+
+
+script "SPEEDBOX" ENTER //NET CLIENTSIDE
+{
+}
+
+script "SecretDoor" (void)
+{
+if (!CheckInventory("YZQUESTKEY4")) Print(s:"Locked.");
+else
+{
+SetLineSpecial(31, 0);
+AmbientSound("SOULSARE", 127);
+MDIsecretending = true;
+SetCVarString("SecretEnder", StrParam(n:0));
+Ceiling_MoveToValue(29, 32, 72);
+Light_ChangeToValue(30, 128);
+delay(70);
+}
+}
+
+
+script "SecretCage" (void)
+{
+if (CheckInventory("CoinKey"))
+{
+    SetLineBlocking(23, BLOCK_NOTHING);
+	SetLineTexture(23, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+	SetLineTexture(23, SIDE_BACK, TEXTURE_MIDDLE, "-");
+	ActivatorSound("Door/Start1", 127);
+	delay(70);
+}
+else print(s:" You don't have a special coin");
+}
+
+
+
+
+script "LinaDamage" (void)
+{
+     if (ActivatorTID() != TID_START + gameinfo[2]) {Fadeto(0,30,90, 0.25, 0.0);  DamageThing(random(18,25), MOD_EXIT); delay(20); Fadeto(0,0,0, 0.0, 1.0);}
+else if (ActivatorTID() == TID_START + gameinfo[2]) {Fadeto(0,30,90, 0.25, 0.0);  LocalAmbientSound("GHOSDEAD", 127);    delay(20); Fadeto(0,0,0, 0.0, 1.0);}
+}
+
+
+script "bloodmoney" (void)
+{
+if ((GetActorProperty (0, APROP_HEALTH) >= 26) && (CheckInventory("IsVictim"))){DamageThing(25, MOD_EXIT); SpawnspotForced("MDIPTSmoney", 33,0,0); }
+else Print(s:"Cannot proceed!");
+}
+
+
+
+
+
+Script "LatentFlashlight" (void)
+{
+int timeee = 30;
+
+SetCVAR(strparam(s:"PSPECIAL", i:PlayerNumber()), 2);
+while (timeee > 0)
+ {
+  timeee--;
+    HudMessage(s: "Latent FLashlight for ", i:timeee, s:" seconds"; HUDMSG_FADEOUT, 2333, CR_GREY, 0.5, 0.2, 2.0, 1.0 );
+  delay(35);
+ }
+SetCVAR(strparam(s:"PSPECIAL", i:PlayerNumber()), 1);
+}
+
+
+
